@@ -13,11 +13,15 @@ import { FieldErrors } from "@/components/ui/field-errors";
 import { useForm } from "@tanstack/react-form";
 import { signupSchema, type SignupValues } from "../schemas/signup.schema";
 import { useIntlayer } from "react-intlayer";
+import { useRegisterUser } from "../api/hooks";
+import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
+  const registerMutation = useRegisterUser();
+  const navigate = useLocalizedNavigate();
   const content = useIntlayer("signup");
 
   const form = useForm({
@@ -31,7 +35,19 @@ export function SignupForm({
       onChange: signupSchema,
     },
     onSubmit: async ({ value }) => {
-      console.log("Submitting:", value);
+      registerMutation.mutate(
+        {
+          username: value.email,
+          password: value.password,
+          full_name: value.name,
+          email: value.email,
+        },
+        {
+          onSuccess: () => {
+            navigate("/auth/login");
+          },
+        },
+      );
     },
   });
 
@@ -138,10 +154,14 @@ export function SignupForm({
         />
 
         <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
+          selector={(state) => [state.canSubmit, registerMutation.isPending]}
           children={([canSubmit, isSubmitting]) => (
             <Field>
-              <Button type="submit" className="w-full" disabled={!canSubmit}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={!canSubmit || isSubmitting}
+              >
                 {isSubmitting ? content.button.submitting : content.button.idle}
               </Button>
             </Field>

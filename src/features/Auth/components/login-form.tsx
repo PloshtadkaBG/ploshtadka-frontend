@@ -13,8 +13,10 @@ import { cn } from "@/lib/utils";
 import { FieldErrors } from "@/components/ui/field-errors";
 import { useIntlayer } from "react-intlayer";
 import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
+import { useLogin } from "../api/hooks";
 
 export function LoginForm({ className }: { className?: string }) {
+  const loginMutation = useLogin();
   const navigate = useLocalizedNavigate();
   const {
     title,
@@ -34,7 +36,18 @@ export function LoginForm({ className }: { className?: string }) {
       password: "",
     } as LoginValues,
     onSubmit: async ({ value }) => {
-      console.log("Submitting:", value);
+      const formData = new FormData();
+      formData.append("username", value.email);
+      formData.append("password", value.password);
+
+      loginMutation.mutate(formData, {
+        onSuccess: () => {
+          navigate({ to: "/" }); // Redirect on success
+        },
+        onError: (error) => {
+          console.error("Login failed:", error);
+        },
+      });
     },
   });
 
@@ -108,7 +121,9 @@ export function LoginForm({ className }: { className?: string }) {
           )}
         </form.Field>
 
-        <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting]}>
+        <form.Subscribe
+          selector={(s) => [s.canSubmit, loginMutation.isPending]}
+        >
           {([canSubmit, isSubmitting]) => (
             <Button type="submit" disabled={!canSubmit || isSubmitting}>
               {isSubmitting ? loginButton.submitting : loginButton.idle}

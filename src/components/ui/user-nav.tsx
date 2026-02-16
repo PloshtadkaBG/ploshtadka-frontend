@@ -1,0 +1,74 @@
+import { useMe, useLogout } from "@Auth/api/hooks";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "./button";
+import { LocalizedLink } from "./localized-link";
+import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
+import { useIntlayer } from "react-intlayer";
+
+export function UserNav({ onAction }: { onAction?: () => void }) {
+  const navigate = useLocalizedNavigate();
+  const { data: user, isLoading } = useMe();
+  const logout = useLogout();
+
+  const content = useIntlayer("user-nav");
+
+  const handleLogout = () => {
+    onAction?.();
+    logout();
+    navigate({ to: "/auth/login" });
+  };
+
+  if (isLoading)
+    return <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />;
+
+  if (!user) {
+    return (
+      <Button asChild size="sm" variant="outline">
+        <LocalizedLink to="/auth/login" onClick={onAction}>
+          {content.labels.login}
+        </LocalizedLink>
+      </Button>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>{user.username?.[0].toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal">
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">
+              {user.full_name || user.username}
+            </p>
+            <p className="text-xs leading-none text-muted-foreground">
+              {user.email}
+            </p>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <LocalizedLink to="/settings" onClick={onAction}>
+            {content.labels.settings}
+          </LocalizedLink>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+          {content.labels.logout}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

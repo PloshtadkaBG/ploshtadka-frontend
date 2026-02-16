@@ -54,8 +54,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <IntlayerProvider locale={locale}>
-          <Header />
           <QueryClientProvider client={queryClient}>
+            <Header />
             {children}
             <ReactQueryDevtools
               initialIsOpen={false}

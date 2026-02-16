@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { FC } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import { LocaleSwitcher } from "@/components/ui/locale-switcher";
 import { LocalizedLink } from "@/components/ui/localized-link";
 import { GalleryVerticalEnd, Menu, X } from "lucide-react";
 import { useIntlayer } from "react-intlayer";
+import { UserNav } from "../ui/user-nav";
 
 const Header: FC = () => {
   const [open, setOpen] = useState(false);
@@ -27,7 +27,7 @@ const Header: FC = () => {
 
         {/* center: nav for md+ */}
         <nav
-          aria-label={content.aria.nav}
+          aria-label={content.aria.nav as string}
           className="hidden md:flex md:items-center md:gap-6"
         >
           {content.navLinks.map((link) => (
@@ -45,15 +45,7 @@ const Header: FC = () => {
         <div className="flex items-center gap-3">
           <div className="hidden md:flex md:items-center md:gap-3">
             <LocaleSwitcher />
-
-            <Button asChild size="sm">
-              <LocalizedLink
-                to="/auth/login"
-                className="rounded-full px-3 py-1.5"
-              >
-                {content.account}
-              </LocalizedLink>
-            </Button>
+            <UserNav />
           </div>
 
           {/* mobile menu button */}
@@ -93,14 +85,7 @@ const Header: FC = () => {
 
                   <div className="flex items-center justify-between pt-2">
                     <LocaleSwitcher />
-                    <Button asChild size="sm" variant="outline">
-                      <LocalizedLink
-                        to="/auth/login"
-                        onClick={() => setOpen(false)}
-                      >
-                        {content.account}
-                      </LocalizedLink>
-                    </Button>
+                    <UserNav />
                   </div>
                 </div>
               </div>
