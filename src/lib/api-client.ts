@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "http://localhost:80",
 });
 
 // add token to every request

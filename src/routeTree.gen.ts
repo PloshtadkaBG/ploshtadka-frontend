@@ -13,6 +13,8 @@ import { Route as Char123LocaleChar125RouteRouteImport } from './routes/{-$local
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
 import { Route as Char123LocaleChar125404RouteImport } from './routes/{-$locale}/404'
 import { Route as Char123LocaleChar125SplatRouteImport } from './routes/{-$locale}/$'
+import { Route as Char123LocaleChar125VenuesIndexRouteImport } from './routes/{-$locale}/venues/index'
+import { Route as Char123LocaleChar125VenuesVenueIdRouteImport } from './routes/{-$locale}/venues/$venueId'
 import { Route as Char123LocaleChar125AuthSignupRouteImport } from './routes/{-$locale}/auth/signup'
 import { Route as Char123LocaleChar125AuthLoginRouteImport } from './routes/{-$locale}/auth/login'
 
@@ -39,6 +41,18 @@ const Char123LocaleChar125SplatRoute =
     path: '/$',
     getParentRoute: () => Char123LocaleChar125RouteRoute,
   } as any)
+const Char123LocaleChar125VenuesIndexRoute =
+  Char123LocaleChar125VenuesIndexRouteImport.update({
+    id: '/venues/',
+    path: '/venues/',
+    getParentRoute: () => Char123LocaleChar125RouteRoute,
+  } as any)
+const Char123LocaleChar125VenuesVenueIdRoute =
+  Char123LocaleChar125VenuesVenueIdRouteImport.update({
+    id: '/venues/$venueId',
+    path: '/venues/$venueId',
+    getParentRoute: () => Char123LocaleChar125RouteRoute,
+  } as any)
 const Char123LocaleChar125AuthSignupRoute =
   Char123LocaleChar125AuthSignupRouteImport.update({
     id: '/auth/signup',
@@ -59,6 +73,8 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/auth/login': typeof Char123LocaleChar125AuthLoginRoute
   '/{-$locale}/auth/signup': typeof Char123LocaleChar125AuthSignupRoute
+  '/{-$locale}/venues/$venueId': typeof Char123LocaleChar125VenuesVenueIdRoute
+  '/{-$locale}/venues/': typeof Char123LocaleChar125VenuesIndexRoute
 }
 export interface FileRoutesByTo {
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
@@ -66,6 +82,8 @@ export interface FileRoutesByTo {
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/auth/login': typeof Char123LocaleChar125AuthLoginRoute
   '/{-$locale}/auth/signup': typeof Char123LocaleChar125AuthSignupRoute
+  '/{-$locale}/venues/$venueId': typeof Char123LocaleChar125VenuesVenueIdRoute
+  '/{-$locale}/venues': typeof Char123LocaleChar125VenuesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -75,6 +93,8 @@ export interface FileRoutesById {
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/auth/login': typeof Char123LocaleChar125AuthLoginRoute
   '/{-$locale}/auth/signup': typeof Char123LocaleChar125AuthSignupRoute
+  '/{-$locale}/venues/$venueId': typeof Char123LocaleChar125VenuesVenueIdRoute
+  '/{-$locale}/venues/': typeof Char123LocaleChar125VenuesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -85,6 +105,8 @@ export interface FileRouteTypes {
     | '/{-$locale}/'
     | '/{-$locale}/auth/login'
     | '/{-$locale}/auth/signup'
+    | '/{-$locale}/venues/$venueId'
+    | '/{-$locale}/venues/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/{-$locale}/$'
@@ -92,6 +114,8 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/{-$locale}/auth/login'
     | '/{-$locale}/auth/signup'
+    | '/{-$locale}/venues/$venueId'
+    | '/{-$locale}/venues'
   id:
     | '__root__'
     | '/{-$locale}'
@@ -100,6 +124,8 @@ export interface FileRouteTypes {
     | '/{-$locale}/'
     | '/{-$locale}/auth/login'
     | '/{-$locale}/auth/signup'
+    | '/{-$locale}/venues/$venueId'
+    | '/{-$locale}/venues/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -136,6 +162,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125SplatRouteImport
       parentRoute: typeof Char123LocaleChar125RouteRoute
     }
+    '/{-$locale}/venues/': {
+      id: '/{-$locale}/venues/'
+      path: '/venues'
+      fullPath: '/{-$locale}/venues/'
+      preLoaderRoute: typeof Char123LocaleChar125VenuesIndexRouteImport
+      parentRoute: typeof Char123LocaleChar125RouteRoute
+    }
+    '/{-$locale}/venues/$venueId': {
+      id: '/{-$locale}/venues/$venueId'
+      path: '/venues/$venueId'
+      fullPath: '/{-$locale}/venues/$venueId'
+      preLoaderRoute: typeof Char123LocaleChar125VenuesVenueIdRouteImport
+      parentRoute: typeof Char123LocaleChar125RouteRoute
+    }
     '/{-$locale}/auth/signup': {
       id: '/{-$locale}/auth/signup'
       path: '/auth/signup'
@@ -159,6 +199,8 @@ interface Char123LocaleChar125RouteRouteChildren {
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
   Char123LocaleChar125AuthLoginRoute: typeof Char123LocaleChar125AuthLoginRoute
   Char123LocaleChar125AuthSignupRoute: typeof Char123LocaleChar125AuthSignupRoute
+  Char123LocaleChar125VenuesVenueIdRoute: typeof Char123LocaleChar125VenuesVenueIdRoute
+  Char123LocaleChar125VenuesIndexRoute: typeof Char123LocaleChar125VenuesIndexRoute
 }
 
 const Char123LocaleChar125RouteRouteChildren: Char123LocaleChar125RouteRouteChildren =
@@ -168,6 +210,9 @@ const Char123LocaleChar125RouteRouteChildren: Char123LocaleChar125RouteRouteChil
     Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
     Char123LocaleChar125AuthLoginRoute: Char123LocaleChar125AuthLoginRoute,
     Char123LocaleChar125AuthSignupRoute: Char123LocaleChar125AuthSignupRoute,
+    Char123LocaleChar125VenuesVenueIdRoute:
+      Char123LocaleChar125VenuesVenueIdRoute,
+    Char123LocaleChar125VenuesIndexRoute: Char123LocaleChar125VenuesIndexRoute,
   }
 
 const Char123LocaleChar125RouteRouteWithChildren =
