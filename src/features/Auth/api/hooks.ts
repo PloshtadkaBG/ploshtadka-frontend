@@ -46,13 +46,22 @@ export const useMe = () => {
   return useQuery({
     queryKey: ["users", "me"],
     queryFn: async () => {
-      const { data } = await apiClient.get<UserPublic>("/users/@me/get");
-      return data;
+      try {
+        const { data } = await apiClient.get<UserPublic>("/users/@me/get");
+        return data;
+      } catch (error: any) {
+        if (error?.response?.status === 401) {
+          localStorage.removeItem("access_token");
+          return null;
+        }
+        throw error;
+      }
     },
     enabled:
       typeof window !== "undefined" && !!localStorage.getItem("access_token"),
     retry: false,
     staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 };
 

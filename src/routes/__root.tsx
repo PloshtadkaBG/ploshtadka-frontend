@@ -48,11 +48,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const locale = localeRoute?.params?.locale ?? defaultLocale;
 
   return (
-    <html dir={getHTMLTextDir(locale)} lang={locale}>
+    <html suppressHydrationWarning dir={getHTMLTextDir(locale)} lang={locale}>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <IntlayerProvider locale={locale}>
           <QueryClientProvider client={queryClient}>
             <Header />
