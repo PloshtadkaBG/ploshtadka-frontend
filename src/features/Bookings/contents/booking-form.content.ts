@@ -46,6 +46,14 @@ const bookingFormContent = {
         en: "Please select a time slot on the grid.",
         bg: "Моля изберете час от таблицата.",
       }),
+      conflict: t({
+        en: "This slot is no longer available. Please choose another time.",
+        bg: "Този час вече не е свободен. Моля изберете друг.",
+      }),
+      generic: t({
+        en: "Something went wrong. Please try again.",
+        bg: "Нещо се обърка. Моля опитайте отново.",
+      }),
     },
     summary: {
       perHour: t({ en: "/ hr", bg: "/ час" }),

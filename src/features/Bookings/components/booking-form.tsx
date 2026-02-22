@@ -247,7 +247,13 @@ export function BookingForm({ venue }: BookingFormProps) {
       });
       navigate({ to: "/{-$locale}/bookings" as any } as any);
     } catch (err: any) {
-      setError(err?.response?.data?.detail ?? "Something went wrong.");
+      const httpStatus = err?.response?.status;
+      console.error("[booking]", err?.response?.data?.detail ?? err);
+      if (httpStatus === 409) {
+        setError(c.errors.conflict.value as string);
+      } else {
+        setError(c.errors.generic.value as string);
+      }
     }
   };
 
@@ -391,6 +397,7 @@ export function BookingForm({ venue }: BookingFormProps) {
                 </h2>
                 <Textarea
                   value={notes}
+                  maxLength={1000}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={c.notesPlaceholder.value as string}
                   rows={2}
