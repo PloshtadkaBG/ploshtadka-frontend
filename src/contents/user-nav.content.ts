@@ -8,6 +8,10 @@ const userNavContent = {
         en: "Login",
         bg: "Влез",
       }),
+      myBookings: t({
+        en: "My Bookings",
+        bg: "Моите резервации",
+      }),
       settings: t({
         en: "Settings",
         bg: "Настройки",

@@ -12,19 +12,29 @@ import { Button } from "./button";
 import { LocalizedLink } from "./localized-link";
 import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
 import { useIntlayer } from "react-intlayer";
+import { useEffect, useState } from "react";
 
 export function UserNav({ onAction }: { onAction?: () => void }) {
+  const [mounted, setMounted] = useState(false);
   const navigate = useLocalizedNavigate();
   const { data: user, isLoading } = useMe();
   const logout = useLogout();
 
   const content = useIntlayer("user-nav");
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleLogout = () => {
     onAction?.();
     logout();
     navigate({ to: "/auth/login" });
   };
+
+  if (!mounted) {
+    return <div className="h-8 w-8" />;
+  }
 
   if (isLoading)
     return <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />;
@@ -60,6 +70,11 @@ export function UserNav({ onAction }: { onAction?: () => void }) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <LocalizedLink to="/bookings" onClick={onAction}>
+            {content.labels.myBookings}
+          </LocalizedLink>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <LocalizedLink to="/settings" onClick={onAction}>
             {content.labels.settings}

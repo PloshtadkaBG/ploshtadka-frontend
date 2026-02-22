@@ -31,7 +31,7 @@ function VenueDetailPage() {
   return <VenueDetail venue={venue} />;
 }
 
-export const Route = createFileRoute("/{-$locale}/venues/$venueId")({
+export const Route = createFileRoute("/{-$locale}/venues/$venueId/")({
   component: VenueDetailPage,
   head: ({ params }) => {
     const { locale } = params;
