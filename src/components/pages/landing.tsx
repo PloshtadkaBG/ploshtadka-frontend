@@ -4,9 +4,11 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { CalendarCheck, CreditCard, ShieldCheck } from "lucide-react";
 import { LocalizedLink as Link } from "@/components/ui/localized-link";
+import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
 
 export function Landing() {
   const content = useIntlayer("landing-page");
+  const navigate = useLocalizedNavigate();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -25,7 +27,11 @@ export function Landing() {
             {content.hero.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="rounded-full px-8">
+            <Button
+              size="lg"
+              className="rounded-full px-8"
+              onClick={() => navigate("/venues")}
+            >
               {content.hero.ctaPrimary}
             </Button>
             <Button size="lg" variant="outline" className="rounded-full px-8">

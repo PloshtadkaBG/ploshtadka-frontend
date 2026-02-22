@@ -5,6 +5,11 @@ export type BookingStatus =
   | "cancelled"
   | "no_show";
 
+export interface OccupiedSlot {
+  start_datetime: string;
+  end_datetime: string;
+}
+
 export interface BookingCreate {
   venue_id: string;
   start_datetime: string; // ISO 8601

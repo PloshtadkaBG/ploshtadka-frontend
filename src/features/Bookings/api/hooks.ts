@@ -1,6 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
-import type { BookingCreate, BookingResponse } from "./types";
+import type { BookingCreate, BookingResponse, OccupiedSlot } from "./types";
+
+export const useOccupiedSlots = (venueId: string) =>
+  useQuery({
+    queryKey: ["bookings", "slots", venueId],
+    queryFn: async () => {
+      const { data } = await apiClient.get<OccupiedSlot[]>("/bookings/slots", {
+        params: { venue_id: venueId },
+      });
+      return data;
+    },
+    enabled:
+      !!venueId &&
+      typeof window !== "undefined" &&
+      !!localStorage.getItem("access_token"),
+  });
 
 export const useMyBookings = () =>
   useQuery({

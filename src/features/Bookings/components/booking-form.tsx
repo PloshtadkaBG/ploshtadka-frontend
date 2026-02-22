@@ -1,104 +1,261 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useIntlayer } from "react-intlayer";
-import { ChevronLeft, Clock } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateBooking } from "../api/hooks";
+import { cn } from "@/lib/utils";
+import {
+  useCreateBooking,
+  useMyBookings,
+  useOccupiedSlots,
+} from "../api/hooks";
 import type { VenueResponse } from "@/features/Venues/api/types";
 
 interface BookingFormProps {
   venue: VenueResponse;
 }
 
-function toLocalDateString(d: Date) {
-  return d.toISOString().split("T")[0];
+// JS getDay() 0=Sun…6=Sat → Python weekday 0=Mon…6=Sun
+function jsDateToVenueKey(d: Date): string {
+  return String((d.getDay() + 6) % 7);
 }
 
-function combineDatetime(date: string, time: string): string {
-  const d = new Date(`${date}T${time}:00`);
-  const offsetMin = -d.getTimezoneOffset();
-  const sign = offsetMin >= 0 ? "+" : "-";
-  const abs = Math.abs(offsetMin);
+function isoDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function offsetAwareISO(dateStr: string, hour: number): string {
+  const d = new Date(`${dateStr}T${String(hour).padStart(2, "0")}:00:00`);
+  const off = -d.getTimezoneOffset();
+  const sign = off >= 0 ? "+" : "-";
+  const abs = Math.abs(off);
   const hh = String(Math.floor(abs / 60)).padStart(2, "0");
   const mm = String(abs % 60).padStart(2, "0");
-  return `${date}T${time}:00${sign}${hh}:${mm}`;
+  return `${dateStr}T${String(hour).padStart(2, "0")}:00:00${sign}${hh}:${mm}`;
 }
 
-function getDurationHours(start: string, end: string): number {
-  const [sh, sm] = start.split(":").map(Number);
-  const [eh, em] = end.split(":").map(Number);
-  return (eh * 60 + em - (sh * 60 + sm)) / 60;
-}
+type CellState =
+  | "available"
+  | "outside"
+  | "unavailable"
+  | "booked"
+  | "mine"
+  | "selected"
+  | "past";
+
+const CELL_CLASSES: Record<CellState, string> = {
+  available: "bg-white hover:bg-emerald-50 cursor-pointer border-slate-100",
+  outside: "bg-slate-100 cursor-default border-slate-100",
+  unavailable: "bg-amber-50 cursor-default border-amber-100",
+  booked: "bg-red-100 cursor-default border-red-200",
+  mine: "bg-blue-100 cursor-default border-blue-200",
+  selected: "bg-emerald-100 border-emerald-300 cursor-pointer",
+  past: "bg-slate-50 cursor-default border-slate-100 opacity-50",
+};
+
+const LEGEND: { key: CellState; labelKey: string }[] = [
+  { key: "available", labelKey: "available" },
+  { key: "selected", labelKey: "selected" },
+  { key: "mine", labelKey: "mine" },
+  { key: "booked", labelKey: "booked" },
+  { key: "unavailable", labelKey: "unavailable" },
+  { key: "outside", labelKey: "closed" },
+];
 
 export function BookingForm({ venue }: BookingFormProps) {
   const c = useIntlayer("booking-form");
   const navigate = useNavigate();
   const createBooking = useCreateBooking();
+  const { data: myBookings = [] } = useMyBookings();
+  const { data: occupiedSlots = [] } = useOccupiedSlots(venue.id);
 
-  const today = toLocalDateString(new Date());
-  const [date, setDate] = useState(today);
-  const [startTime, setStartTime] = useState("10:00");
-  const [endTime, setEndTime] = useState("12:00");
+  const [weekOffset, setWeekOffset] = useState(0); // in days
+  const [selDate, setSelDate] = useState<string | null>(null);
+  const [selStart, setSelStart] = useState<number | null>(null); // hour (inclusive)
+  const [selEnd, setSelEnd] = useState<number | null>(null); // hour (inclusive)
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const duration = useMemo(
-    () => getDurationHours(startTime, endTime),
-    [startTime, endTime],
+  // 7-day window
+  const dates = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + weekOffset + i);
+      return d;
+    });
+  }, [weekOffset]);
+
+  // Hour range from working_hours
+  const [minHour, maxHour] = useMemo(() => {
+    let min = 8,
+      max = 22;
+    for (const v of Object.values(venue.working_hours)) {
+      if (!v) continue;
+      const o = parseInt(v.open);
+      const c = parseInt(v.close);
+      if (o < min) min = o;
+      if (c > max) max = c;
+    }
+    return [min, max];
+  }, [venue.working_hours]);
+
+  const hours = useMemo(
+    () => Array.from({ length: maxHour - minHour }, (_, i) => minHour + i),
+    [minHour, maxHour],
   );
 
-  const totalPrice = useMemo(() => {
-    if (duration <= 0) return null;
-    return (Number(venue.price_per_hour) * duration).toFixed(2);
-  }, [duration, venue.price_per_hour]);
+  // My bookings for this venue
+  const myVenueBookings = useMemo(
+    () =>
+      myBookings.filter(
+        (b) =>
+          b.venue_id === venue.id &&
+          b.status !== "cancelled" &&
+          b.status !== "no_show",
+      ),
+    [myBookings, venue.id],
+  );
 
-  const formattedDatetime = useMemo(() => {
-    if (!date) return null;
-    const d = new Date(date + "T00:00:00");
-    return d.toLocaleDateString(undefined, {
+  function getCellState(
+    dateStr: string,
+    hour: number,
+    dateObj: Date,
+  ): CellState {
+    // Past slots
+    const now = new Date();
+    const nowDate = isoDate(now);
+    if (dateStr < nowDate || (dateStr === nowDate && hour < now.getHours())) {
+      return "past";
+    }
+
+    // Working hours
+    const key = jsDateToVenueKey(dateObj);
+    const wh = venue.working_hours[key] ?? venue.working_hours["default"];
+    if (!wh || hour < parseInt(wh.open) || hour >= parseInt(wh.close)) {
+      return "outside";
+    }
+
+    // Venue unavailabilities
+    const cellStart = new Date(
+      `${dateStr}T${String(hour).padStart(2, "0")}:00:00`,
+    );
+    const cellEnd = new Date(
+      `${dateStr}T${String(hour + 1).padStart(2, "0")}:00:00`,
+    );
+    for (const u of venue.unavailabilities) {
+      const us = new Date(u.start_datetime);
+      const ue = new Date(u.end_datetime);
+      if (cellStart < ue && cellEnd > us) return "unavailable";
+    }
+
+    // Others' bookings (anonymous — just the time window)
+    for (const b of occupiedSlots) {
+      const bs = new Date(b.start_datetime);
+      const be = new Date(b.end_datetime);
+      if (cellStart < be && cellEnd > bs) return "booked";
+    }
+
+    // My bookings (shown differently so user recognises their own)
+    for (const b of myVenueBookings) {
+      const bs = new Date(b.start_datetime);
+      const be = new Date(b.end_datetime);
+      if (cellStart < be && cellEnd > bs) return "mine";
+    }
+
+    // Selected range
+    if (selDate === dateStr && selStart !== null) {
+      const lo = selEnd !== null ? Math.min(selStart, selEnd) : selStart;
+      const hi = selEnd !== null ? Math.max(selStart, selEnd) : selStart;
+      if (hour >= lo && hour <= hi) return "selected";
+    }
+
+    return "available";
+  }
+
+  function handleCellClick(dateStr: string, hour: number, state: CellState) {
+    if (
+      state === "outside" ||
+      state === "unavailable" ||
+      state === "booked" ||
+      state === "mine" ||
+      state === "past"
+    )
+      return;
+
+    if (selDate !== dateStr || selStart === null) {
+      // New selection
+      setSelDate(dateStr);
+      setSelStart(hour);
+      setSelEnd(null);
+    } else if (selEnd === null) {
+      // Set end (allow clicking start again to clear)
+      if (hour === selStart) {
+        setSelStart(null);
+        setSelDate(null);
+      } else {
+        const lo = Math.min(selStart, hour);
+        const hi = Math.max(selStart, hour);
+        setSelStart(lo);
+        setSelEnd(hi);
+      }
+    } else {
+      // Reset and start new
+      setSelDate(dateStr);
+      setSelStart(hour);
+      setSelEnd(null);
+    }
+    setError(null);
+  }
+
+  const duration =
+    selStart !== null && selEnd !== null
+      ? selEnd - selStart + 1
+      : selStart !== null
+        ? 1
+        : 0;
+  const totalPrice =
+    duration > 0 ? (Number(venue.price_per_hour) * duration).toFixed(2) : null;
+
+  const formattedSel = useMemo(() => {
+    if (!selDate || selStart === null) return null;
+    const d = new Date(selDate + "T00:00:00");
+    const dateLabel = d.toLocaleDateString(undefined, {
       weekday: "short",
       day: "numeric",
       month: "short",
     });
-  }, [date]);
+    const endH = selEnd ?? selStart;
+    return `${dateLabel} · ${String(selStart).padStart(2, "0")}:00 – ${String(endH + 1).padStart(2, "0")}:00`;
+  }, [selDate, selStart, selEnd]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (duration < 1) {
-      setError(c.errors.minDuration.value as string);
+    if (!selDate || selStart === null) {
+      setError(c.errors.selectSlot.value as string);
       return;
     }
-    if (duration <= 0) {
-      setError(c.errors.endBeforeStart.value as string);
-      return;
-    }
-
+    const endH = selEnd ?? selStart;
     try {
       await createBooking.mutateAsync({
         venue_id: venue.id,
-        start_datetime: combineDatetime(date, startTime),
-        end_datetime: combineDatetime(date, endTime),
+        start_datetime: offsetAwareISO(selDate, selStart),
+        end_datetime: offsetAwareISO(selDate, endH + 1),
         notes: notes.trim() || null,
       });
       navigate({ to: "/{-$locale}/bookings" as any } as any);
     } catch (err: any) {
-      setError(
-        err?.response?.data?.detail ??
-          "Something went wrong. Please try again.",
-      );
+      setError(err?.response?.data?.detail ?? "Something went wrong.");
     }
   };
+
+  const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto max-w-6xl px-6 py-8">
-        {/* Back */}
         <button
           type="button"
           onClick={() =>
@@ -119,73 +276,124 @@ export function BookingForm({ venue }: BookingFormProps) {
 
         <form onSubmit={handleSubmit}>
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Left: form */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Date */}
-              <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
-                <h2 className="font-semibold text-slate-900">
-                  {c.sections.date}
-                </h2>
-                <Input
-                  type="date"
-                  value={date}
-                  min={today}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                  className="max-w-xs"
-                />
-              </div>
+            {/* Left: grid */}
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-white rounded-2xl border shadow-sm p-4">
+                {/* Week nav */}
+                <div className="flex items-center justify-between mb-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={weekOffset <= 0}
+                    onClick={() => setWeekOffset((o) => o - 7)}
+                  >
+                    {c.grid.prev}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    {c.grid.instruction}
+                  </p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setWeekOffset((o) => o + 7)}
+                  >
+                    {c.grid.next}
+                  </Button>
+                </div>
 
-              {/* Time */}
-              <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
-                <h2 className="font-semibold text-slate-900">
-                  {c.sections.time}
-                </h2>
-                <div className="flex items-end gap-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      {c.labels.start}
-                    </Label>
-                    <Input
-                      type="time"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      required
-                      className="w-36"
-                    />
-                  </div>
-                  <span className="pb-2.5 text-muted-foreground">→</span>
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      {c.labels.end}
-                    </Label>
-                    <Input
-                      type="time"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      required
-                      className="w-36"
-                    />
-                  </div>
-                  {duration > 0 && (
-                    <div className="pb-2.5 flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Clock size={14} />
-                      {duration} {c.labels.hours}
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-xs">
+                    <thead>
+                      <tr>
+                        <th className="w-12" />
+                        {dates.map((d) => {
+                          const ds = isoDate(d);
+                          const isToday = ds === isoDate(new Date());
+                          return (
+                            <th
+                              key={ds}
+                              className={cn(
+                                "text-center pb-2 font-medium px-1",
+                                isToday ? "text-primary" : "text-slate-500",
+                              )}
+                            >
+                              <div>{DAY_SHORT[(d.getDay() + 6) % 7]}</div>
+                              <div
+                                className={cn(
+                                  "text-base font-bold",
+                                  isToday && "text-primary",
+                                )}
+                              >
+                                {d.getDate()}
+                              </div>
+                            </th>
+                          );
+                        })}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {hours.map((hour) => (
+                        <tr key={hour}>
+                          <td className="text-right pr-2 text-slate-400 tabular-nums py-0 leading-none w-12">
+                            {String(hour).padStart(2, "0")}:00
+                          </td>
+                          {dates.map((d) => {
+                            const ds = isoDate(d);
+                            const state = getCellState(ds, hour, d);
+                            return (
+                              <td
+                                key={ds}
+                                onClick={() => handleCellClick(ds, hour, state)}
+                                className={cn(
+                                  "h-8 border text-center transition-colors",
+                                  CELL_CLASSES[state],
+                                  state === "selected" &&
+                                    selDate === ds &&
+                                    (hour === (selStart ?? -1) ||
+                                      hour === (selEnd ?? selStart ?? -1)) &&
+                                    "font-bold",
+                                )}
+                              />
+                            );
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Legend */}
+                <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-slate-100">
+                  {LEGEND.map(({ key, labelKey }) => (
+                    <div
+                      key={key}
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground"
+                    >
+                      <div
+                        className={cn(
+                          "w-3 h-3 rounded-sm border",
+                          CELL_CLASSES[key],
+                        )}
+                      />
+                      {(c.grid.legend as any)[labelKey]}
                     </div>
-                  )}
+                  ))}
                 </div>
               </div>
 
               {/* Notes */}
-              <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-4">
-                <h2 className="font-semibold text-slate-900">
+              <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-3">
+                <h2 className="font-semibold text-slate-900 text-sm">
                   {c.sections.notes}
                 </h2>
                 <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder={c.notesPlaceholder.value as string}
-                  rows={3}
+                  rows={2}
                 />
               </div>
 
@@ -216,19 +424,13 @@ export function BookingForm({ venue }: BookingFormProps) {
                 <Separator />
 
                 <div className="space-y-2 text-sm">
-                  {formattedDatetime && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Date</span>
-                      <span className="font-medium">{formattedDatetime}</span>
-                    </div>
-                  )}
-                  {duration > 0 ? (
+                  {formattedSel ? (
                     <>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          {startTime} – {endTime}
-                        </span>
-                        <span className="font-medium tabular-nums">
+                      <p className="font-medium text-slate-800">
+                        {formattedSel}
+                      </p>
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>
                           {duration} {c.labels.hours}
                         </span>
                       </div>
@@ -250,7 +452,9 @@ export function BookingForm({ venue }: BookingFormProps) {
                   type="submit"
                   size="lg"
                   className="w-full rounded-xl"
-                  disabled={createBooking.isPending || duration < 1}
+                  disabled={
+                    createBooking.isPending || !selDate || selStart === null
+                  }
                 >
                   {createBooking.isPending
                     ? c.submit.submitting

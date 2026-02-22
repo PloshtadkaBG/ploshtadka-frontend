@@ -25,7 +25,6 @@ const Header: FC = () => {
           </LocalizedLink>
         </div>
 
-        {/* center: nav for md+ */}
         <nav
           aria-label={content.aria.nav as string}
           className="hidden md:flex md:items-center md:gap-6"
