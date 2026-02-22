@@ -4,8 +4,8 @@ const headerContent = {
   key: "header",
   content: {
     brand: t({
-      en: "Acme Inc.",
-      bg: "Acme Inc.",
+      en: "Ploshtadka.BG",
+      bg: "Ploshtadka.BG",
     }),
     navLinks: [
       {

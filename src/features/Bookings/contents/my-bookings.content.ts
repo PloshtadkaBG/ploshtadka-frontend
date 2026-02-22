@@ -4,7 +4,7 @@ const myBookingsContent = {
   key: "my-bookings",
   content: {
     meta: {
-      title: t({ en: "My Bookings | SportSpot", bg: "Моите резервации | SportSpot" }),
+      title: t({ en: "My Bookings | Ploshtadka.BG", bg: "Моите резервации | Ploshtadka.BG" }),
       description: t({
         en: "View and manage your venue bookings.",
         bg: "Преглед и управление на вашите резервации.",

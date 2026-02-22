@@ -5,8 +5,8 @@ const landingContent = {
   content: {
     meta: {
       title: t({
-        en: "SportSpot | Rent Sports Facilities Instantly",
-        bg: "SportSpot | Наемете спортни съоръжения моментално",
+        en: "Ploshtadka.BG | Rent Sports Facilities Instantly",
+        bg: "Ploshtadka.BG | Наемете спортни съоръжения моментално",
       }),
       description: t({
         en: "The easiest way to book football pitches, tennis courts, and gyms near you.",

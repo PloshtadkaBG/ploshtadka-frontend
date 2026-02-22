@@ -5,8 +5,8 @@ const venuesListContent = {
   content: {
     meta: {
       title: t({
-        en: "Browse Venues | SportSpot",
-        bg: "Разгледайте бази | SportSpot",
+        en: "Browse Venues | Ploshtadka.BG",
+        bg: "Разгледайте бази | Ploshtadka.BG",
       }),
       description: t({
         en: "Find and book sports venues near you — football, tennis, basketball and more.",

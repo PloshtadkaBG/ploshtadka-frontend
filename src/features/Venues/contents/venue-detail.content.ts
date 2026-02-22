@@ -5,8 +5,8 @@ const venueDetailContent = {
   content: {
     meta: {
       title: t({
-        en: "Venue | SportSpot",
-        bg: "База | SportSpot",
+        en: "Venue | Ploshtadka.BG",
+        bg: "База | Ploshtadka.BG",
       }),
       description: t({
         en: "View venue details, working hours, amenities and book your slot.",

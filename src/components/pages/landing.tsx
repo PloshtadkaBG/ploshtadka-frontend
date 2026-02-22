@@ -105,7 +105,10 @@ export function Landing() {
           </nav>
 
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} SportSpot. {content.footer.rights}
+            © {new Date().getFullYear()} Ploshtadka.BG. {content.footer.rights}
+          </p>
+          <p className="text-xs text-muted-foreground/40 mt-1">
+            built with shadcn/ui
           </p>
         </div>
       </footer>

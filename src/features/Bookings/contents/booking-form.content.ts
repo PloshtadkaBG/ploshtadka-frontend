@@ -5,8 +5,8 @@ const bookingFormContent = {
   content: {
     meta: {
       title: t({
-        en: "Book Venue | SportSpot",
-        bg: "Резервирай база | SportSpot",
+        en: "Book Venue | Ploshtadka.BG",
+        bg: "Резервирай база | Ploshtadka.BG",
       }),
       description: t({
         en: "Book your slot at this venue.",
