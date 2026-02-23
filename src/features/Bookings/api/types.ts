@@ -1,3 +1,24 @@
+export type PaymentStatus = "pending" | "paid" | "refunded" | "failed";
+
+export interface PaymentResponse {
+  id: string;
+  booking_id: string;
+  user_id: string;
+  venue_owner_id: string;
+  stripe_session_id: string;
+  stripe_payment_intent_id: string | null;
+  amount: string;
+  currency: string;
+  status: PaymentStatus;
+  updated_at: string;
+}
+
+export interface CheckoutResponse {
+  checkout_url: string;
+  session_id: string;
+  payment_id: string;
+}
+
 export type BookingStatus =
   | "pending"
   | "confirmed"

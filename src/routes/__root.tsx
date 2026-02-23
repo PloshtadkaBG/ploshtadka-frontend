@@ -12,8 +12,11 @@ import { queryClient } from "@/constants";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
+import { Toaster } from "sonner";
+
 import appCss from "../styles.css?url";
 import Header from "@/components/templates/header";
+import Footer from "@/components/templates/footer";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -57,6 +60,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <QueryClientProvider client={queryClient}>
             <Header />
             {children}
+            <Footer />
+            <Toaster richColors position="top-right" />
             <ReactQueryDevtools
               initialIsOpen={false}
               buttonPosition="bottom-left"

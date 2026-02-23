@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import {
   useCreateBooking,
+  useCreateCheckout,
   useMyBookings,
   useOccupiedSlots,
 } from "../api/hooks";
@@ -68,6 +69,7 @@ export function BookingForm({ venue }: BookingFormProps) {
   const c = useIntlayer("booking-form");
   const navigate = useNavigate();
   const createBooking = useCreateBooking();
+  const createCheckout = useCreateCheckout();
   const { data: myBookings = [] } = useMyBookings();
   const { data: occupiedSlots = [] } = useOccupiedSlots(venue.id);
 
@@ -238,14 +240,14 @@ export function BookingForm({ venue }: BookingFormProps) {
       return;
     }
     const endH = selEnd ?? selStart;
+    let booking;
     try {
-      await createBooking.mutateAsync({
+      booking = await createBooking.mutateAsync({
         venue_id: venue.id,
         start_datetime: offsetAwareISO(selDate, selStart),
         end_datetime: offsetAwareISO(selDate, endH + 1),
         notes: notes.trim() || null,
       });
-      navigate({ to: "/{-$locale}/bookings" as any } as any);
     } catch (err: any) {
       const httpStatus = err?.response?.status;
       console.error("[booking]", err?.response?.data?.detail ?? err);
@@ -254,6 +256,22 @@ export function BookingForm({ venue }: BookingFormProps) {
       } else {
         setError(c.errors.generic.value as string);
       }
+      return;
+    }
+
+    try {
+      const { checkout_url, payment_id } = await createCheckout.mutateAsync(
+        booking.id,
+      );
+      if (!checkout_url.startsWith("https://checkout.stripe.com/")) {
+        throw new Error("Unexpected checkout URL");
+      }
+      sessionStorage.setItem("pending_payment_id", payment_id);
+      window.location.href = checkout_url;
+    } catch (err: any) {
+      console.error("[checkout]", err?.response?.data?.detail ?? err);
+      setError(c.errors.checkoutFailed.value as string);
+      navigate({ to: "/{-$locale}/bookings" as any } as any);
     }
   };
 
@@ -460,12 +478,17 @@ export function BookingForm({ venue }: BookingFormProps) {
                   size="lg"
                   className="w-full rounded-xl"
                   disabled={
-                    createBooking.isPending || !selDate || selStart === null
+                    createBooking.isPending ||
+                    createCheckout.isPending ||
+                    !selDate ||
+                    selStart === null
                   }
                 >
                   {createBooking.isPending
                     ? c.submit.submitting
-                    : c.submit.idle}
+                    : createCheckout.isPending
+                      ? c.submit.redirecting
+                      : c.submit.idle}
                 </Button>
               </div>
             </div>

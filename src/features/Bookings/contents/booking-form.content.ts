@@ -54,6 +54,10 @@ const bookingFormContent = {
         en: "Something went wrong. Please try again.",
         bg: "Нещо се обърка. Моля опитайте отново.",
       }),
+      checkoutFailed: t({
+        en: "Booking created, but payment setup failed. Pay from My Bookings.",
+        bg: "Резервацията е направена, но плащането не успя. Платете от Моите резервации.",
+      }),
     },
     summary: {
       perHour: t({ en: "/ hr", bg: "/ час" }),
@@ -64,8 +68,12 @@ const bookingFormContent = {
       }),
     },
     submit: {
-      idle: t({ en: "Confirm Booking", bg: "Потвърди резервация" }),
+      idle: t({ en: "Confirm & Pay", bg: "Потвърди и плати" }),
       submitting: t({ en: "Booking...", bg: "Резервиране..." }),
+      redirecting: t({
+        en: "Redirecting to payment...",
+        bg: "Пренасочване към плащане...",
+      }),
     },
     notesPlaceholder: t({
       en: "Any special requests...",

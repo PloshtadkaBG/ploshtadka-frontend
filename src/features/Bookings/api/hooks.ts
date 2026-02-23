@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/api-client";
-import type { BookingCreate, BookingResponse, OccupiedSlot } from "./types";
+import type {
+  BookingCreate,
+  BookingResponse,
+  CheckoutResponse,
+  OccupiedSlot,
+  PaymentResponse,
+} from "./types";
 
 export const useOccupiedSlots = (venueId: string) =>
   useQuery({
@@ -43,6 +49,61 @@ export const useCreateBooking = () => {
     },
   });
 };
+
+export const useMyPayments = () =>
+  useQuery({
+    queryKey: ["payments", "mine"],
+    queryFn: async () => {
+      const { data } = await apiClient.get<PaymentResponse[]>("/payments/");
+      return data;
+    },
+    enabled:
+      typeof window !== "undefined" && !!localStorage.getItem("access_token"),
+    // Poll every 3 s while any payment is still pending (waiting for Stripe webhook).
+    // Stops automatically once all payments settle to paid/failed/refunded.
+    refetchInterval: (query) =>
+      query.state.data?.some((p) => p.status === "pending") ? 3000 : false,
+  });
+
+export const useAbandonPayment = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (paymentId: string) => {
+      await apiClient.post(`/payments/${paymentId}/abandon`);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      queryClient.invalidateQueries({ queryKey: ["bookings"] });
+    },
+  });
+};
+
+export const useCreateCheckout = () =>
+  useMutation({
+    mutationFn: async (bookingId: string) => {
+      const { data } = await apiClient.post<CheckoutResponse>(
+        "/payments/checkout",
+        { booking_id: bookingId },
+      );
+      return data;
+    },
+  });
+
+export const useBookingPayment = (bookingId: string) =>
+  useQuery({
+    queryKey: ["payments", "booking", bookingId],
+    queryFn: async () => {
+      const { data } = await apiClient.get<PaymentResponse>(
+        `/payments/booking/${bookingId}`,
+      );
+      return data;
+    },
+    enabled:
+      !!bookingId &&
+      typeof window !== "undefined" &&
+      !!localStorage.getItem("access_token"),
+    retry: false,
+  });
 
 export const useCancelBooking = () => {
   const queryClient = useQueryClient();
