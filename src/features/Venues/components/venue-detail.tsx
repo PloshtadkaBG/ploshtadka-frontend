@@ -241,39 +241,71 @@ export function VenueDetail({ venue }: VenueDetailProps) {
 
             {/* Today's unavailabilities */}
             {todayUnavailabilities.length > 0 && (
-              <div>
-                <h2 className="text-lg font-semibold mb-3">
+              <div className="space-y-3">
+                {/* Section Title */}
+                <h2 className="text-lg font-semibold flex items-center gap-2">
                   {c.sections.unavailableToday}
                 </h2>
+
                 <div className="space-y-2">
                   {todayUnavailabilities.map((u) => {
-                    const startTime = new Date(
-                      u.start_datetime,
-                    ).toLocaleTimeString([], {
+                    const start = new Date(u.start_datetime);
+                    const end = new Date(u.end_datetime);
+                    const isSameDay =
+                      start.toDateString() === end.toDateString();
+
+                    // Formatting Options with "as const" to fix TS Error 2769
+                    const dateOptions = {
+                      month: "short",
+                      day: "numeric",
+                    } as const;
+                    const timeOptions = {
                       hour: "2-digit",
                       minute: "2-digit",
-                    });
-                    const endTime = new Date(u.end_datetime).toLocaleTimeString(
-                      [],
-                      {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      },
-                    );
+                    } as const;
+
+                    const startDate = start.toLocaleDateString([], dateOptions);
+                    const startTime = start.toLocaleTimeString([], timeOptions);
+                    const endDate = end.toLocaleDateString([], dateOptions);
+                    const endTime = end.toLocaleTimeString([], timeOptions);
+
                     return (
                       <div
                         key={u.id}
-                        className="flex items-center gap-2 text-sm text-muted-foreground bg-orange-50 border border-orange-100 rounded-lg px-3 py-2"
+                        className="group flex flex-col sm:flex-row sm:items-center gap-3 bg-orange-50 border border-orange-100 rounded-lg px-3 py-2.5 transition-colors hover:bg-orange-100/50"
                       >
-                        <Clock size={14} className="text-orange-500 shrink-0" />
-                        <span className="tabular-nums">
-                          {startTime} – {endTime}
-                        </span>
-                        {u.reason && (
-                          <span className="text-muted-foreground/70">
-                            · {u.reason}
-                          </span>
-                        )}
+                        <div className="flex items-start gap-2 flex-1">
+                          <Clock
+                            size={16}
+                            className="text-orange-500 shrink-0 mt-0.5"
+                          />
+
+                          <div className="flex flex-col gap-0.5 tabular-nums">
+                            <div className="text-sm">
+                              <span className="font-semibold text-orange-900">
+                                {startDate}
+                              </span>
+                              <span className="text-muted-foreground">
+                                , {startTime}
+                              </span>
+                              <span className="mx-1.5 text-orange-300">—</span>
+                              {!isSameDay && (
+                                <span className="font-semibold text-orange-900">
+                                  {endDate},{" "}
+                                </span>
+                              )}
+                              <span className="text-muted-foreground">
+                                {endTime}
+                              </span>
+                            </div>
+
+                            {u.reason && (
+                              <span className="text-xs text-muted-foreground/80 italic">
+                                {u.reason}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     );
                   })}

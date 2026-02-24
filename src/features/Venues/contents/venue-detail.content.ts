@@ -24,8 +24,8 @@ const venueDetailContent = {
       amenities: t({ en: "Amenities", bg: "Удобства" }),
       workingHours: t({ en: "Working hours", bg: "Работно време" }),
       unavailableToday: t({
-        en: "Unavailable today",
-        bg: "Недостъпно днес",
+        en: "Currently Unavailable",
+        bg: "Недостъпно в момента",
       }),
     },
     days: {

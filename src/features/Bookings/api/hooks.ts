@@ -78,12 +78,12 @@ export const useAbandonPayment = () => {
   });
 };
 
-export const useCreateCheckout = () =>
+export const useCreateCheckout = (locale?: string) =>
   useMutation({
     mutationFn: async (bookingId: string) => {
       const { data } = await apiClient.post<CheckoutResponse>(
         "/payments/checkout",
-        { booking_id: bookingId },
+        { booking_id: bookingId, locale: locale ?? null },
       );
       return data;
     },

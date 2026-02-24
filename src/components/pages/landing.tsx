@@ -91,27 +91,6 @@ export function Landing() {
           </div>
         </div>
       </section>
-
-      {/* Simple Footer */}
-      <footer className="mt-auto border-t py-12 bg-white">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <nav className="flex gap-8 text-sm font-medium text-muted-foreground">
-            <Link to="/about" className="hover:text-primary transition">
-              {content.footer.company}
-            </Link>
-            <Link to="/contact" className="hover:text-primary transition">
-              {content.footer.contact}
-            </Link>
-          </nav>
-
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Ploshtadka.BG. {content.footer.rights}
-          </p>
-          <p className="text-xs text-muted-foreground/40 mt-1">
-            built with shadcn/ui
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

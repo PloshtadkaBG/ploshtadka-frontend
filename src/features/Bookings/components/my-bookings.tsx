@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useIntlayer } from "react-intlayer";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Calendar, Clock, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,10 +45,11 @@ function formatDatetime(iso: string) {
 export function MyBookings() {
   const c = useIntlayer("my-bookings");
   const navigate = useNavigate();
+  const { locale } = useParams({ strict: false }) as { locale?: string };
   const { data: bookings, isLoading } = useMyBookings();
   const { data: payments = [], isLoading: isLoadingPayments } = useMyPayments();
   const cancelBooking = useCancelBooking();
-  const createCheckout = useCreateCheckout();
+  const createCheckout = useCreateCheckout(locale);
   const abandonPayment = useAbandonPayment();
   const queryClient = useQueryClient();
   const [payingBookingId, setPayingBookingId] = useState<string | null>(null);
@@ -71,6 +72,7 @@ export function MyBookings() {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
     const result = params.get("payment");
+    if (!result) return;
 
     if (result === "success") {
       toast.success(c.toasts.paymentSuccess.value as string);
@@ -84,15 +86,13 @@ export function MyBookings() {
       }
     }
 
-    if (result) {
-      params.delete("payment");
-      const newSearch = params.toString();
-      history.replaceState(
-        null,
-        "",
-        window.location.pathname + (newSearch ? `?${newSearch}` : ""),
-      );
-    }
+    params.delete("payment");
+    const newSearch = params.toString();
+    history.replaceState(
+      null,
+      "",
+      window.location.pathname + (newSearch ? `?${newSearch}` : ""),
+    );
   }, []);
 
   const handlePayNow = async (bookingId: string) => {

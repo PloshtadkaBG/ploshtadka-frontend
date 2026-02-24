@@ -5,6 +5,10 @@ const config: IntlayerConfig = {
     locales: [Locales.ENGLISH, Locales.BULGARIAN],
     defaultLocale: Locales.BULGARIAN,
   },
+  routing: {
+    mode: "prefix-all",
+    storage: "localStorage",
+  },
 };
 
 export default config;

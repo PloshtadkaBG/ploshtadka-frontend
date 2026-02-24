@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useIntlayer } from "react-intlayer";
+import { useIntlayer, useLocaleStorage } from "react-intlayer";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -68,8 +68,9 @@ const LEGEND: { key: CellState; labelKey: string }[] = [
 export function BookingForm({ venue }: BookingFormProps) {
   const c = useIntlayer("booking-form");
   const navigate = useNavigate();
+  const { getLocale } = useLocaleStorage();
   const createBooking = useCreateBooking();
-  const createCheckout = useCreateCheckout();
+  const createCheckout = useCreateCheckout(getLocale());
   const { data: myBookings = [] } = useMyBookings();
   const { data: occupiedSlots = [] } = useOccupiedSlots(venue.id);
 
