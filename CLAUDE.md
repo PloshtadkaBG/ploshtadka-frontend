@@ -62,7 +62,7 @@ src/
       schemas/            # Zod schemas for form validation
   components/
     pages/                # landing, not-found
-    templates/            # header
+    templates/            # header, footer
     ui/                   # shadcn/ui + custom components
   contents/               # root-level intlayer content declarations
   hooks/
@@ -75,7 +75,7 @@ src/
 
 TanStack Start uses file-based routing. The route tree is **auto-generated** into `src/routeTree.gen.ts` by `@tanstack/router-plugin` at build time — never edit it directly.
 
-The `{-$locale}` segment is an optional dynamic prefix that captures the locale (`en`, `bg`, etc.). `route.tsx` validates the prefix and redirects invalid locales to `/404`.
+The `{-$locale}` segment captures the locale (`en`, `bg`). **intlayer is configured in `prefix-all` mode** (`intlayer.config.ts`) — every URL must carry a locale prefix (e.g. `/en/bookings`). Bare `/bookings` URLs will be redirected. `route.tsx` validates the prefix and redirects invalid locales to `/404`.
 
 To add a new route, create a file under `src/routes/{-$locale}/` following the file-naming convention.
 
@@ -95,6 +95,10 @@ Mirrors the admin panel:
 1. `POST /auth/token` (form-urlencoded) → stores `access_token` in `localStorage`
 2. `GET /users/@me/get` with `staleTime: Infinity` for current user
 3. Logout: removes token + clears QueryClient cache
+
+### Payments integration
+
+After Stripe Checkout, Stripe redirects to `/en/bookings?payment=success` or `/en/bookings?payment=cancelled`. The `my-bookings` page reads this query param to show a toast/banner. payments-ms injects the locale prefix into the return URLs dynamically.
 
 ### Testing
 
