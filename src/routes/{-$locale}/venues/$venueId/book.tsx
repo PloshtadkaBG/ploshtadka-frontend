@@ -1,24 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { getIntlayer } from "intlayer";
 import { useVenue } from "@/features/Venues/api/hooks";
 import { BookingForm } from "@/features/Bookings/components/booking-form";
-import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
-import { useEffect } from "react";
 
 function BookVenuePage() {
   const { venueId } = Route.useParams();
   const { data: venue, isLoading, isError } = useVenue(venueId);
-  const navigate = useLocalizedNavigate();
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (
-      typeof window !== "undefined" &&
-      !localStorage.getItem("access_token")
-    ) {
-      navigate({ to: "/auth/login" });
-    }
-  }, [navigate]);
 
   if (isLoading) {
     return (
@@ -43,6 +30,18 @@ function BookVenuePage() {
 
 export const Route = createFileRoute("/{-$locale}/venues/$venueId/book")({
   component: BookVenuePage,
+  beforeLoad: ({ location }) => {
+    if (
+      typeof window !== "undefined" &&
+      !localStorage.getItem("access_token")
+    ) {
+      throw redirect({
+        to: "/{-$locale}/auth/login",
+        params: { locale: location.pathname.split("/")[1] },
+        search: { redirect: location.href },
+      });
+    }
+  },
   head: ({ params }) => {
     const { locale } = params;
     const meta = getIntlayer("booking-form", locale).meta;

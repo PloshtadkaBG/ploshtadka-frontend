@@ -13,11 +13,14 @@ import { cn } from "@/lib/utils";
 import { FieldErrors } from "@/components/ui/field-errors";
 import { useIntlayer } from "react-intlayer";
 import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import { useLogin } from "../api/hooks";
 
 export function LoginForm({ className }: { className?: string }) {
   const loginMutation = useLogin();
   const navigate = useLocalizedNavigate();
+  const rawNavigate = useNavigate();
+  const search = useSearch({ strict: false }) as { redirect?: string };
   const {
     title,
     description,
@@ -42,7 +45,11 @@ export function LoginForm({ className }: { className?: string }) {
 
       loginMutation.mutate(formData, {
         onSuccess: () => {
-          navigate({ to: "/" }); // Redirect on success
+          if (search.redirect) {
+            rawNavigate({ to: search.redirect });
+          } else {
+            navigate({ to: "/" });
+          }
         },
         onError: (error) => {
           console.error("Login failed:", error);

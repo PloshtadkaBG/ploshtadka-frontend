@@ -5,6 +5,9 @@ import { getIntlayer } from "intlayer";
 
 export const Route = createFileRoute("/{-$locale}/auth/login")({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   head: ({ params }) => {
     const { locale } = params;
     const metaContent = getIntlayer("login", locale).meta;

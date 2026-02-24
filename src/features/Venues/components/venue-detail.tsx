@@ -59,14 +59,14 @@ export function VenueDetail({ venue }: VenueDetailProps) {
       typeof window !== "undefined"
         ? localStorage.getItem("access_token")
         : null;
-    if (!token) {
-      localizedNavigate("/auth/login");
-    } else {
-      navigate({
-        to: "/{-$locale}/venues/$venueId/book" as any,
-        params: { venueId: venue.id } as any,
-      });
-    }
+    // if (!token) {
+    //   localizedNavigate("/auth/login");
+    // } else {
+    navigate({
+      to: "/{-$locale}/venues/$venueId/book" as any,
+      params: { venueId: venue.id } as any,
+    });
+    // }
   };
 
   return (

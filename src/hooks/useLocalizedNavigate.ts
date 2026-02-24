@@ -36,13 +36,14 @@ export const useLocalizedNavigate = () => {
       });
     }
 
-    const { to, ...rest } = args;
+    const { to, search, ...rest } = args;
 
     const localizedTo = `/${LOCALE_ROUTE}${to}` as any;
 
     return navigate({
       to: localizedTo,
       params: { locale: localePrefix, ...rest } as any,
+      ...(search !== undefined ? { search } : {}),
     });
   };
 
