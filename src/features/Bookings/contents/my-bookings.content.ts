@@ -48,6 +48,22 @@ const myBookingsContent = {
       cancelled: t({ en: "Cancelled", bg: "Отказана" }),
       no_show: t({ en: "No show", bg: "Не се явил" }),
     },
+    details: {
+      title: t({ en: "Booking Details", bg: "Детайли за резервацията" }),
+      schedule: t({ en: "Schedule", bg: "График" }),
+      start: t({ en: "Start", bg: "Начало" }),
+      end: t({ en: "End", bg: "Край" }),
+      duration: t({ en: "Duration", bg: "Продължителност" }),
+      pricing: t({ en: "Pricing", bg: "Цена" }),
+      rate: t({ en: "Rate", bg: "Тарифа" }),
+      payment: t({ en: "Payment", bg: "Плащане" }),
+      notes: t({ en: "Notes", bg: "Бележки" }),
+      references: t({ en: "References", bg: "Референции" }),
+      bookingId: t({ en: "Booking ID", bg: "ID на резервация" }),
+      viewVenue: t({ en: "View venue →", bg: "Вижте базата →" }),
+      close: t({ en: "Close", bg: "Затвори" }),
+      updatedAt: t({ en: "Last updated", bg: "Последна промяна" }),
+    },
   },
 } satisfies Dictionary;
 

@@ -13,7 +13,8 @@ import { FieldErrors } from "@/components/ui/field-errors";
 import { useForm } from "@tanstack/react-form";
 import { signupSchema, type SignupValues } from "../schemas/signup.schema";
 import { useIntlayer } from "react-intlayer";
-import { useGoogleLogin as useGoogleOAuth } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
+import { useRef } from "react";
 import { useRegisterUser, useGoogleLogin } from "../api/hooks";
 import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
 
@@ -26,14 +27,13 @@ export function SignupForm({
   const navigate = useLocalizedNavigate();
   const content = useIntlayer("signup");
 
-  const handleGoogleSuccess = useGoogleOAuth({
-    onSuccess: ({ credential }) => {
-      if (!credential) return;
-      googleLoginMutation.mutate(credential, {
-        onSuccess: () => navigate("/"),
-      });
-    },
-  });
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  const triggerGoogleLogin = () => {
+    googleButtonRef.current
+      ?.querySelector<HTMLElement>("div[role=button]")
+      ?.click();
+  };
 
   const form = useForm({
     defaultValues: {
@@ -193,12 +193,24 @@ export function SignupForm({
 
         <FieldSeparator>{content.separator}</FieldSeparator>
 
+        <div ref={googleButtonRef} className="hidden">
+          <GoogleLogin
+            onSuccess={({ credential }) => {
+              if (!credential) return;
+              googleLoginMutation.mutate(credential, {
+                onSuccess: () => navigate("/"),
+              });
+            }}
+            onError={() => {}}
+          />
+        </div>
+
         <Button
           variant="outline"
           type="button"
           className="w-full"
           disabled={googleLoginMutation.isPending}
-          onClick={() => handleGoogleSuccess()}
+          onClick={triggerGoogleLogin}
         >
           <svg
             role="img"

@@ -14,7 +14,8 @@ import { FieldErrors } from "@/components/ui/field-errors";
 import { useIntlayer } from "react-intlayer";
 import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
 import { useSearch, useNavigate } from "@tanstack/react-router";
-import { useGoogleLogin as useGoogleOAuth } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
+import { useRef } from "react";
 import { useLogin, useGoogleLogin } from "../api/hooks";
 
 export function LoginForm({ className }: { className?: string }) {
@@ -36,20 +37,13 @@ export function LoginForm({ className }: { className?: string }) {
     googleButton,
   } = useIntlayer("login");
 
-  const handleGoogleSuccess = useGoogleOAuth({
-    onSuccess: ({ credential }) => {
-      if (!credential) return;
-      googleLoginMutation.mutate(credential, {
-        onSuccess: () => {
-          if (search.redirect) {
-            rawNavigate({ to: search.redirect });
-          } else {
-            navigate({ to: "/" });
-          }
-        },
-      });
-    },
-  });
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  const triggerGoogleLogin = () => {
+    googleButtonRef.current
+      ?.querySelector<HTMLElement>("div[role=button]")
+      ?.click();
+  };
 
   const form = useForm({
     defaultValues: {
@@ -170,11 +164,29 @@ export function LoginForm({ className }: { className?: string }) {
 
         <FieldSeparator>{orSeparator}</FieldSeparator>
 
+        <div ref={googleButtonRef} className="hidden">
+          <GoogleLogin
+            onSuccess={({ credential }) => {
+              if (!credential) return;
+              googleLoginMutation.mutate(credential, {
+                onSuccess: () => {
+                  if (search.redirect) {
+                    rawNavigate({ to: search.redirect });
+                  } else {
+                    navigate({ to: "/" });
+                  }
+                },
+              });
+            }}
+            onError={() => {}}
+          />
+        </div>
+
         <Button
           variant="outline"
           type="button"
           disabled={googleLoginMutation.isPending}
-          onClick={() => handleGoogleSuccess()}
+          onClick={triggerGoogleLogin}
         >
           <svg
             role="img"

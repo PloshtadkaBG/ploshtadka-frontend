@@ -13,7 +13,12 @@ import {
   useCreateCheckout,
   useAbandonPayment,
 } from "../api/hooks";
-import type { BookingStatus, PaymentStatus } from "../api/types";
+import type {
+  BookingResponse,
+  BookingStatus,
+  PaymentStatus,
+} from "../api/types";
+import { BookingDetailsSheet } from "./booking-details-sheet";
 
 const STATUS_COLOR: Record<BookingStatus, string> = {
   pending: "text-yellow-600 border-yellow-300 bg-yellow-50",
@@ -53,6 +58,8 @@ export function MyBookings() {
   const abandonPayment = useAbandonPayment();
   const queryClient = useQueryClient();
   const [payingBookingId, setPayingBookingId] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] =
+    useState<BookingResponse | null>(null);
 
   // Payment map: booking_id → most recent payment
   const paymentByBooking = new Map(payments.map((p) => [p.booking_id, p]));
@@ -151,7 +158,8 @@ export function MyBookings() {
               return (
                 <div
                   key={booking.id}
-                  className="bg-white rounded-2xl border shadow-sm p-5"
+                  className="bg-white rounded-2xl border shadow-sm p-5 cursor-pointer hover:shadow-md hover:border-slate-300 transition-all"
+                  onClick={() => setSelectedBooking(booking)}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-2 min-w-0">
@@ -198,7 +206,10 @@ export function MyBookings() {
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-2 shrink-0">
+                    <div
+                      className="flex flex-col gap-2 shrink-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {needsPayment && (
                         <Button
                           variant="default"
@@ -229,6 +240,25 @@ export function MyBookings() {
           </div>
         )}
       </div>
+
+      <BookingDetailsSheet
+        booking={selectedBooking}
+        payment={
+          selectedBooking ? paymentByBooking.get(selectedBooking.id) : undefined
+        }
+        locale={locale}
+        payingBookingId={payingBookingId}
+        isCancelPending={cancelBooking.isPending}
+        onClose={() => setSelectedBooking(null)}
+        onPayNow={(id) => {
+          setSelectedBooking(null);
+          handlePayNow(id);
+        }}
+        onCancel={(id) => {
+          setSelectedBooking(null);
+          cancelBooking.mutate(id);
+        }}
+      />
     </div>
   );
 }

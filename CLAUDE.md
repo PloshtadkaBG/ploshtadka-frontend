@@ -8,6 +8,7 @@ React SSR-capable app (TanStack Start) serving the public-facing venue booking e
 bun run dev      # Vite dev server on port 3000
 bun run build    # production build
 bun run test     # vitest (unit/component tests)
+bunx intlayer build  # regenerate i18n types after editing *.content.ts files
 ```
 
 ## Architecture
@@ -50,7 +51,8 @@ src/
       api/types.ts        # BookingResponse, BookingCreate, OccupiedSlot
       components/
         booking-form.tsx  # 7-day × hourly grid picker; color-coded availability
-        my-bookings.tsx   # list with status badges + cancel for PENDING
+        my-bookings.tsx   # list with status badges, cancel, pay-now; click to open details
+        booking-details-sheet.tsx  # framer-motion slide-over with schedule, pricing, payment, refs
       contents/           # booking-form.content.ts, my-bookings.content.ts
     Auth/
       api/
