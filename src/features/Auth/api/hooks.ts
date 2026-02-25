@@ -20,6 +20,18 @@ export const useLogin = () => {
   });
 };
 
+export const useGoogleLogin = () => {
+  return useMutation({
+    mutationFn: async (credential: string) => {
+      const response = await apiClient.post<Token>("/auth/google", {
+        credential,
+      });
+      localStorage.setItem("access_token", response.data.access_token);
+      return response.data;
+    },
+  });
+};
+
 export const useLogout = () => {
   const queryClient = useQueryClient();
 

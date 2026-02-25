@@ -63,6 +63,10 @@ const loginFormContent = {
       en: "Sign up",
       bg: "Регистрация",
     }),
+    googleButton: t({
+      en: "Continue with Google",
+      bg: "Продължи с Google",
+    }),
   },
 } satisfies Dictionary;
 

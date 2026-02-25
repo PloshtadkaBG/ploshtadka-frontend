@@ -56,6 +56,10 @@ const signupContent = {
       link: t({ en: "Terms and Conditions", bg: "Общи условия" }),
     },
     separator: t({ en: "Or", bg: "Или" }),
+    googleButton: t({
+      en: "Continue with Google",
+      bg: "Продължи с Google",
+    }),
     loginPrompt: {
       text: t({ en: "Already have an account? ", bg: "Вече имате профил? " }),
       link: t({ en: "Sign in", bg: "Вход" }),

@@ -12,6 +12,7 @@ import { queryClient } from "@/constants";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
@@ -56,18 +57,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body suppressHydrationWarning>
-        <IntlayerProvider locale={locale}>
-          <QueryClientProvider client={queryClient}>
-            <Header />
-            {children}
-            <Footer />
-            <Toaster richColors position="top-right" />
-            <ReactQueryDevtools
-              initialIsOpen={false}
-              buttonPosition="bottom-left"
-            />
-          </QueryClientProvider>
-        </IntlayerProvider>
+        <GoogleOAuthProvider
+          clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""}
+        >
+          <IntlayerProvider locale={locale}>
+            <QueryClientProvider client={queryClient}>
+              <Header />
+              {children}
+              <Footer />
+              <Toaster richColors position="top-right" />
+              <ReactQueryDevtools
+                initialIsOpen={false}
+                buttonPosition="bottom-left"
+              />
+            </QueryClientProvider>
+          </IntlayerProvider>
+        </GoogleOAuthProvider>
         <TanStackDevtools
           config={{
             position: "bottom-right",
