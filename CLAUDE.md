@@ -56,7 +56,7 @@ src/
       contents/           # booking-form.content.ts, my-bookings.content.ts
     Auth/
       api/
-        api-client.ts     # axios instance → http://localhost:8022
+        api-client.ts     # axios instance → http://localhost:80
         hooks.ts          # useLogin, useLogout, useMe, etc.
         types.ts
       components/         # LoginForm, SignupForm, FormWrapper
@@ -105,3 +105,10 @@ After Stripe Checkout, Stripe redirects to `/en/bookings?payment=success` or `/e
 ### Testing
 
 Tests use vitest + `@testing-library/react`. Run with `bun run test` (vitest in run mode).
+
+## Gotchas
+
+- **Datetime**: always append local timezone offset when sending to API — naive ISO strings cause off-by-N-hour bugs
+- **`working_hours` weekday keys**: `"0"` = Monday … `"6"` = Sunday (not JS default). JS formula: `String((new Date().getDay() + 6) % 7)`
+- **intlayer HTML attributes**: `placeholder`, `aria-label`, etc. need `.value as string` — intlayer nodes render fine as JSX children but fail as HTML string attributes
+- **Debounce**: free-text and number inputs → `useDebounce(value, 400)` before firing queries; selects and toggles fire instantly
