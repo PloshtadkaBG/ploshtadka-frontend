@@ -106,6 +106,13 @@ After Stripe Checkout, Stripe redirects to `/en/bookings?payment=success` or `/e
 
 Tests use vitest + `@testing-library/react`. Run with `bun run test` (vitest in run mode).
 
+## Adding a new feature
+
+1. Create `src/features/<Feature>/api/types.ts`, `api/hooks.ts`, and components under `src/features/<Feature>/components/`
+2. Add a route file under `src/routes/{-$locale}/` — the route tree regenerates automatically at build time
+3. Add i18n content declarations in `src/features/<Feature>/contents/*.content.ts`, then run `bunx intlayer build`
+4. Use `src/lib/api-client.ts` for all API calls (never create a new axios instance)
+
 ## Gotchas
 
 - **Datetime**: always append local timezone offset when sending to API — naive ISO strings cause off-by-N-hour bugs
