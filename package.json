@@ -35,7 +35,8 @@
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.1.18",
     "vite-intlayer": "^8.1.1",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tanstack/devtools-vite": "^0.3.11",
