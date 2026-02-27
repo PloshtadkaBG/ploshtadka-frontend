@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_API_URL ?? "/api",
 });
 
 // add token to every request
@@ -19,7 +19,10 @@ apiClient.interceptors.response.use(
     if (error?.response?.status === 401) {
       localStorage.removeItem("access_token");
       if (!window.location.pathname.includes("/auth/login")) {
-        window.location.href = "/auth/login";
+        const localeMatch =
+          window.location.pathname.match(/^\/([a-z]{2})(\/|$)/);
+        const locale = localeMatch ? localeMatch[1] : "bg";
+        window.location.href = `/${locale}/auth/login`;
       }
     }
     return Promise.reject(error);
