@@ -4,6 +4,8 @@ import { useIntlayer } from "react-intlayer";
 import { useVenues } from "../api/hooks";
 import { VenueCard } from "./venue-card";
 import { useDebounce } from "@/hooks/useDebounce";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { SportType } from "../api/types";
 
 const SPORT_VALUES: SportType[] = [
@@ -82,145 +84,156 @@ export function VenuesList() {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto max-w-6xl px-6 py-10">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         {/* Page header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">{c.title}</h1>
-          <p className="text-muted-foreground mt-1">{c.subtitle}</p>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            {c.title}
+          </h1>
+          <p className="mt-1 text-muted-foreground">{c.subtitle}</p>
         </div>
 
         {/* Filter bar */}
-        <div className="bg-white rounded-2xl border p-4 mb-8 flex flex-wrap gap-3 items-end">
-          {/* Sport type */}
-          <div className="flex flex-col gap-1 min-w-36">
-            <label className="text-xs font-medium text-muted-foreground">
-              {c.filters.sport.label}
-            </label>
-            <select
-              value={filters.sport_type}
-              onChange={(e) =>
-                set("sport_type", e.target.value as SportType | "")
-              }
-              className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">{c.filters.sport.all}</option>
-              {SPORT_VALUES.map((v) => (
-                <option key={v} value={v}>
-                  {c.sports[v]}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* City */}
-          <div className="flex flex-col gap-1 min-w-36">
-            <label className="text-xs font-medium text-muted-foreground">
-              {c.filters.city.label}
-            </label>
-            <input
-              type="text"
-              placeholder={c.filters.city.placeholder.value as string}
-              value={filters.city}
-              onChange={(e) => set("city", e.target.value)}
-              className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-
-          {/* Price range */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-muted-foreground">
-              {c.filters.price.label}
-            </label>
-            <div className="flex items-center gap-2">
-              <input
-                type="number"
-                placeholder={c.filters.price.min.value as string}
-                min={0}
-                value={filters.min_price}
-                onChange={(e) => set("min_price", e.target.value)}
-                className="h-9 w-20 rounded-lg border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <span className="text-muted-foreground text-sm">–</span>
-              <input
-                type="number"
-                placeholder={c.filters.price.max.value as string}
-                min={0}
-                value={filters.max_price}
-                onChange={(e) => set("max_price", e.target.value)}
-                className="h-9 w-20 rounded-lg border border-input bg-transparent px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
+        <div className="mb-8 rounded-2xl border bg-card p-4 shadow-sm">
+          <div className="flex flex-wrap items-end gap-3">
+            {/* Sport type */}
+            <div className="flex min-w-36 flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                {c.filters.sport.label}
+              </label>
+              <select
+                value={filters.sport_type}
+                onChange={(e) =>
+                  set("sport_type", e.target.value as SportType | "")
+                }
+                className="h-9 rounded-lg border border-input bg-transparent px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="">{c.filters.sport.all}</option>
+                {SPORT_VALUES.map((v) => (
+                  <option key={v} value={v}>
+                    {c.sports[v]}
+                  </option>
+                ))}
+              </select>
             </div>
-          </div>
 
-          {/* Indoor toggle */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-medium text-muted-foreground">
-              {c.filters.type.label}
-            </label>
-            <div className="flex rounded-lg border border-input overflow-hidden h-9 text-sm">
-              {typeOptions.map(({ label, value }) => (
-                <button
-                  key={String(label.value)}
-                  onClick={() => set("is_indoor", value)}
-                  className={
-                    filters.is_indoor === value
-                      ? "px-3 bg-primary text-primary-foreground font-medium"
-                      : "px-3 text-muted-foreground hover:bg-muted/40 transition-colors"
-                  }
-                >
-                  {label}
-                </button>
-              ))}
+            {/* City */}
+            <div className="flex min-w-36 flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                {c.filters.city.label}
+              </label>
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder={c.filters.city.placeholder.value as string}
+                  value={filters.city}
+                  onChange={(e) => set("city", e.target.value)}
+                  className="h-9 rounded-lg border border-input bg-transparent pl-8 pr-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Clear */}
-          {hasActiveFilters && (
-            <button
-              onClick={() => setFilters(INITIAL_FILTERS)}
-              className="h-9 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors self-end"
-            >
-              {c.filters.clear}
-            </button>
-          )}
+            {/* Price range */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                {c.filters.price.label}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  placeholder={c.filters.price.min.value as string}
+                  min={0}
+                  value={filters.min_price}
+                  onChange={(e) => set("min_price", e.target.value)}
+                  className="h-9 w-20 rounded-lg border border-input bg-transparent px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+                <span className="text-sm text-muted-foreground">–</span>
+                <input
+                  type="number"
+                  placeholder={c.filters.price.max.value as string}
+                  min={0}
+                  value={filters.max_price}
+                  onChange={(e) => set("max_price", e.target.value)}
+                  className="h-9 w-20 rounded-lg border border-input bg-transparent px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              </div>
+            </div>
+
+            {/* Indoor toggle */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                {c.filters.type.label}
+              </label>
+              <div className="flex h-9 overflow-hidden rounded-lg border border-input text-sm">
+                {typeOptions.map(({ label, value }) => (
+                  <button
+                    key={String(label.value)}
+                    onClick={() => set("is_indoor", value)}
+                    className={
+                      filters.is_indoor === value
+                        ? "bg-primary px-3 font-medium text-primary-foreground"
+                        : "px-3 text-muted-foreground transition-colors hover:bg-muted/40"
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Clear */}
+            {hasActiveFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setFilters(INITIAL_FILTERS)}
+                className="gap-1.5 self-end text-muted-foreground"
+              >
+                <X className="size-3.5" />
+                {c.filters.clear}
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Results */}
         {isLoading && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl border h-72 animate-pulse"
+                className="h-80 animate-pulse rounded-2xl border bg-muted/50"
               />
             ))}
           </div>
         )}
 
         {isError && (
-          <div className="text-center py-20 text-muted-foreground">
+          <div className="py-20 text-center text-muted-foreground">
             {c.error}
           </div>
         )}
 
         {!isLoading && !isError && venues?.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-lg font-medium text-slate-900 mb-1">
+          <div className="py-20 text-center">
+            <SlidersHorizontal className="mx-auto mb-4 size-10 text-muted-foreground/40" />
+            <p className="text-lg font-semibold text-foreground">
               {c.empty.title}
             </p>
-            <p className="text-muted-foreground">{c.empty.subtitle}</p>
+            <p className="mt-1 text-muted-foreground">{c.empty.subtitle}</p>
           </div>
         )}
 
         {!isLoading && !isError && venues && venues.length > 0 && (
           <>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="mb-4 text-sm text-muted-foreground">
               {venues.length}{" "}
               {venues.length === 1 ? c.results.venue : c.results.venues}{" "}
               {c.results.found}
             </p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {venues.map((venue) => (
                 <VenueCard
                   key={venue.id}

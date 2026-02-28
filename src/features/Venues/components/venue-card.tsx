@@ -12,7 +12,7 @@ const SPORT_COLORS: Record<string, string> = {
   swimming: "bg-cyan-500",
   gym: "bg-purple-500",
   padel: "bg-pink-500",
-  other: "bg-slate-500",
+  other: "bg-muted",
 };
 
 interface VenueCardProps {
@@ -26,91 +26,100 @@ export function VenueCard({ venue, onClick }: VenueCardProps) {
   const extraSports = venue.sport_types.length - 2;
 
   return (
-    <div
+    <article
       onClick={onClick}
-      className="group bg-white rounded-2xl border shadow-sm overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+      className="group cursor-pointer overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/5"
     >
-      {/* Thumbnail */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+      {/* Image */}
+      <div className="relative aspect-[16/10] overflow-hidden bg-muted">
         {venue.thumbnail ? (
           <img
             src={venue.thumbnail}
             alt={venue.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div
             className={cn(
-              "w-full h-full flex items-center justify-center",
-              primarySport ? SPORT_COLORS[primarySport] : "bg-slate-300",
+              "flex size-full items-center justify-center",
+              primarySport ? SPORT_COLORS[primarySport] : "bg-muted",
             )}
           >
-            <span className="text-white/30 text-6xl font-black select-none">
+            <span className="select-none text-6xl font-black text-white/20">
               {venue.name[0]}
             </span>
           </div>
         )}
 
-        {/* Indoor badge */}
-        {venue.is_indoor && (
-          <div className="absolute top-3 left-3">
+        {/* Overlay gradient */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/50 to-transparent" />
+
+        {/* Top badges */}
+        <div className="absolute left-3 top-3 flex gap-2">
+          {venue.is_indoor && (
             <Badge
               variant="secondary"
-              className="bg-white/90 text-slate-700 text-xs"
+              className="bg-background/90 text-xs backdrop-blur-sm"
             >
               {c.card.indoor}
-            </Badge>
-          </div>
-        )}
-
-        {/* Rating */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 rounded-full px-2 py-0.5 text-xs font-semibold">
-          <Star size={11} className="text-yellow-500 fill-yellow-500" />
-          {Number(venue.rating).toFixed(1)}
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="p-4 space-y-3">
-        <div>
-          <h3 className="font-semibold text-slate-900 leading-tight truncate">
-            {venue.name}
-          </h3>
-          <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-            <MapPin size={11} />
-            {venue.city}
-          </div>
-        </div>
-
-        {/* Sport type badges */}
-        <div className="flex flex-wrap gap-1.5">
-          {venue.sport_types.slice(0, 2).map((s) => (
-            <Badge key={s} variant="secondary" className="text-xs">
-              {c.sports[s] ?? s}
-            </Badge>
-          ))}
-          {extraSports > 0 && (
-            <Badge variant="outline" className="text-xs">
-              +{extraSports}
             </Badge>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Users size={11} />
-            {venue.capacity}
-          </div>
-          <div className="text-sm font-semibold text-slate-900">
+        {/* Rating */}
+        <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-background/90 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm">
+          <Star className="size-3 fill-yellow-500 text-yellow-500" />
+          {Number(venue.rating).toFixed(1)}
+        </div>
+
+        {/* Price overlay */}
+        <div className="absolute bottom-3 right-3">
+          <span className="font-display text-xl font-bold text-white drop-shadow-md">
             {Number(venue.price_per_hour).toFixed(0)}{" "}
-            <span className="text-xs font-normal text-muted-foreground">
+            <span className="text-sm font-normal text-white/80">
               {venue.currency}
               {c.card.perHour}
             </span>
+          </span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="p-4">
+        <h3 className="truncate font-display text-lg font-semibold text-foreground">
+          {venue.name}
+        </h3>
+
+        <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+          <MapPin className="size-3" />
+          {venue.city}
+        </div>
+
+        {/* Sport badges + capacity */}
+        <div className="mt-3 flex items-center justify-between">
+          <div className="flex flex-wrap gap-1.5">
+            {venue.sport_types.slice(0, 2).map((s) => (
+              <Badge
+                key={s}
+                variant="secondary"
+                className="text-xs font-medium"
+              >
+                {c.sports[s] ?? s}
+              </Badge>
+            ))}
+            {extraSports > 0 && (
+              <Badge variant="outline" className="text-xs">
+                +{extraSports}
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Users className="size-3" />
+            {venue.capacity}
           </div>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
