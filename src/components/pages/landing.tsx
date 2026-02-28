@@ -46,58 +46,79 @@ export function Landing() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background py-20 lg:py-32">
-        {/* Decorative blobs */}
-        <div className="pointer-events-none absolute -top-24 left-1/2 size-[600px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 right-0 size-[400px] rounded-full bg-accent/5 blur-3xl" />
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 py-16 lg:py-24">
+        {/* Decorative blob */}
+        <div className="pointer-events-none absolute -right-32 top-0 size-[500px] rounded-full bg-primary/5 blur-3xl" />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <Badge
-            variant="outline"
-            className="mb-6 border-primary/30 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary"
-          >
-            <MapPin className="mr-1.5 size-3.5" />
-            {content.hero.badge}
-          </Badge>
-
-          <h1 className="mx-auto max-w-4xl font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            {content.hero.title}
-          </h1>
-
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            {content.hero.subtitle}
-          </p>
-
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button
-              size="lg"
-              className="gap-2 px-8 shadow-lg shadow-primary/20"
-              onClick={() => navigate("/venues")}
-            >
-              <Search className="size-4" />
-              {content.hero.ctaPrimary}
-            </Button>
-            <Button
-              size="lg"
+        <div className="relative z-10 mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-8">
+          {/* Left: copy */}
+          <div>
+            <Badge
               variant="outline"
-              className="gap-2 px-8"
-              asChild
+              className="mb-5 border-primary/30 bg-primary/5 px-4 py-1.5 text-sm font-medium text-primary"
             >
-              <Link to="/about-us">
-                {content.hero.ctaSecondary}
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-          </div>
+              <MapPin className="mr-1.5 size-3.5" />
+              {content.hero.badge}
+            </Badge>
 
-          {/* Social proof stats */}
-          <div className="mx-auto mt-16 flex max-w-md justify-center gap-8 border-t pt-8 sm:gap-12">
-            {Object.values(content.hero.stats).map((stat, i) => (
-              <div key={i} className="text-center">
-                <p className="font-display text-2xl font-bold text-foreground">
+            <h1 className="max-w-lg font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1]">
+              {content.hero.title}
+            </h1>
+
+            <p className="mt-5 max-w-md text-lg leading-relaxed text-muted-foreground">
+              {content.hero.subtitle}
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                className="gap-2 px-8 shadow-lg shadow-primary/20"
+                onClick={() => navigate("/venues")}
+              >
+                <Search className="size-4" />
+                {content.hero.ctaPrimary}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 px-8"
+                asChild
+              >
+                <Link to="/about-us">
+                  {content.hero.ctaSecondary}
+                  <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
+
+            {/* Stats */}
+            <div className="mt-10 flex gap-8">
+              {Object.values(content.hero.stats).map((stat, i) => (
+                <p
+                  key={i}
+                  className="font-display text-sm font-bold text-foreground sm:text-base"
+                >
                   {stat}
                 </p>
-              </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: feature highlights grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {content.categories.list.slice(0, 4).map((sport, index) => (
+              <button
+                key={index}
+                onClick={() => navigate("/venues")}
+                className="group flex cursor-pointer flex-col items-center gap-3 rounded-2xl border bg-card/80 p-8 backdrop-blur-sm transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+              >
+                <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                  {SPORT_ICONS[index]}
+                </div>
+                <span className="text-sm font-semibold text-foreground">
+                  {sport.name}
+                </span>
+              </button>
             ))}
           </div>
         </div>
@@ -175,7 +196,7 @@ export function Landing() {
       </section>
 
       {/* Categories / Sports */}
-      <section className="py-20 lg:py-28">
+      <section className="py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-14 text-center">
             <h2 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
