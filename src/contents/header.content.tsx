@@ -9,21 +9,21 @@ const headerContent = {
     }),
     navLinks: [
       {
-        href: "/about-us",
-        label: t({ en: "About", bg: "За нас" }),
+        href: "/venues",
+        label: t({ en: "Venues", bg: "Обекти" }),
       },
       {
-        href: "/features",
-        label: t({ en: "Features", bg: "Възможности" }),
+        href: "/about-us",
+        label: t({ en: "About", bg: "За нас" }),
       },
       {
         href: "/pricing",
         label: t({ en: "Pricing", bg: "Цени" }),
       },
     ],
-    account: t({
-      en: "Account",
-      bg: "Профил",
+    cta: t({
+      en: "Find Venues",
+      bg: "Намери обект",
     }),
     aria: {
       nav: t({ en: "Primary", bg: "Основна навигация" }),
