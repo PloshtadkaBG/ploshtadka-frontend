@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useIntlayer } from "react-intlayer";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { Calendar, Clock, CreditCard } from "lucide-react";
+import { Calendar, Clock, CreditCard, CalendarSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,18 +21,26 @@ import type {
 import { BookingDetailsSheet } from "./booking-details-sheet";
 
 const STATUS_COLOR: Record<BookingStatus, string> = {
-  pending: "text-yellow-600 border-yellow-300 bg-yellow-50",
-  confirmed: "text-green-700 border-green-300 bg-green-50",
-  completed: "text-slate-600 border-slate-300 bg-slate-50",
-  cancelled: "text-red-600 border-red-200 bg-red-50",
-  no_show: "text-red-600 border-red-200 bg-red-50",
+  pending:
+    "text-yellow-600 border-yellow-300 bg-yellow-50 dark:text-yellow-400 dark:border-yellow-800 dark:bg-yellow-950/30",
+  confirmed:
+    "text-green-700 border-green-300 bg-green-50 dark:text-green-400 dark:border-green-800 dark:bg-green-950/30",
+  completed:
+    "text-muted-foreground border-border bg-muted",
+  cancelled:
+    "text-red-600 border-red-200 bg-red-50 dark:text-red-400 dark:border-red-800 dark:bg-red-950/30",
+  no_show:
+    "text-red-600 border-red-200 bg-red-50 dark:text-red-400 dark:border-red-800 dark:bg-red-950/30",
 };
 
 const PAYMENT_COLOR: Record<PaymentStatus, string> = {
-  pending: "text-orange-600 border-orange-200 bg-orange-50",
-  paid: "text-emerald-700 border-emerald-300 bg-emerald-50",
-  refunded: "text-blue-600 border-blue-200 bg-blue-50",
-  failed: "text-red-600 border-red-200 bg-red-50",
+  pending:
+    "text-orange-600 border-orange-200 bg-orange-50 dark:text-orange-400 dark:border-orange-800 dark:bg-orange-950/30",
+  paid: "text-emerald-700 border-emerald-300 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:bg-emerald-950/30",
+  refunded:
+    "text-blue-600 border-blue-200 bg-blue-50 dark:text-blue-400 dark:border-blue-800 dark:bg-blue-950/30",
+  failed:
+    "text-red-600 border-red-200 bg-red-50 dark:text-red-400 dark:border-red-800 dark:bg-red-950/30",
 };
 
 function formatDatetime(iso: string) {
@@ -61,11 +69,8 @@ export function MyBookings() {
   const [selectedBooking, setSelectedBooking] =
     useState<BookingResponse | null>(null);
 
-  // Payment map: booking_id → most recent payment
   const paymentByBooking = new Map(payments.map((p) => [p.booking_id, p]));
 
-  // When pending payments settle (webhook fired), refetch bookings so any
-  // booking that was cancelled server-side shows its updated status.
   const hasPendingPayments = payments.some((p) => p.status === "pending");
   const prevHadPendingRef = useRef(false);
   useEffect(() => {
@@ -122,19 +127,22 @@ export function MyBookings() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground text-sm">Loading...</div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-sm text-muted-foreground">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto max-w-3xl px-6 py-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-6">{c.title}</h1>
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <h1 className="mb-6 font-display text-2xl font-bold tracking-tight text-foreground">
+          {c.title}
+        </h1>
 
         {!bookings?.length ? (
-          <div className="bg-white rounded-2xl border shadow-sm p-12 text-center space-y-4">
+          <div className="space-y-4 rounded-2xl border bg-card p-12 text-center shadow-sm">
+            <CalendarSearch className="mx-auto size-10 text-muted-foreground/40" />
             <p className="text-muted-foreground">{c.empty}</p>
             <Button
               variant="outline"
@@ -158,18 +166,18 @@ export function MyBookings() {
               return (
                 <div
                   key={booking.id}
-                  className="bg-white rounded-2xl border shadow-sm p-5 cursor-pointer hover:shadow-md hover:border-slate-300 transition-all"
+                  className="cursor-pointer rounded-2xl border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                   onClick={() => setSelectedBooking(booking)}
                 >
                   <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-2 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs text-muted-foreground font-mono">
+                    <div className="min-w-0 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-xs text-muted-foreground">
                           {c.venue}: {booking.venue_id.slice(0, 8)}…
                         </span>
                         <span
                           className={cn(
-                            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border",
+                            "inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
                             STATUS_COLOR[status],
                           )}
                         >
@@ -178,12 +186,12 @@ export function MyBookings() {
                         {payment && (
                           <span
                             className={cn(
-                              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border",
+                              "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
                               PAYMENT_COLOR[payment.status],
                               payment.status === "pending" && "animate-pulse",
                             )}
                           >
-                            <CreditCard size={10} />
+                            <CreditCard className="size-2.5" />
                             {c.paymentStatus[payment.status]}
                           </span>
                         )}
@@ -191,23 +199,23 @@ export function MyBookings() {
 
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <Calendar size={13} />
+                          <Calendar className="size-3.5" />
                           {start.date}
                         </span>
                         <span className="flex items-center gap-1 tabular-nums">
-                          <Clock size={13} />
+                          <Clock className="size-3.5" />
                           {start.time} – {end.time}
                         </span>
                       </div>
 
-                      <p className="text-sm font-semibold">
+                      <p className="text-sm font-semibold text-foreground">
                         {Number(booking.total_price).toFixed(2)}{" "}
                         {booking.currency}
                       </p>
                     </div>
 
                     <div
-                      className="flex flex-col gap-2 shrink-0"
+                      className="flex shrink-0 flex-col gap-2"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {needsPayment && (
@@ -225,7 +233,7 @@ export function MyBookings() {
                         <Button
                           variant="outline"
                           size="sm"
-                          className="text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10"
+                          className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                           disabled={cancelBooking.isPending}
                           onClick={() => cancelBooking.mutate(booking.id)}
                         >

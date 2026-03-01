@@ -48,9 +48,9 @@ function Row({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex justify-between items-start gap-4 py-1.5">
-      <span className="text-sm text-muted-foreground shrink-0">{label}</span>
-      <span className="text-sm text-right">{children}</span>
+    <div className="flex items-start justify-between gap-4 py-1.5">
+      <span className="shrink-0 text-sm text-muted-foreground">{label}</span>
+      <span className="text-right text-sm">{children}</span>
     </div>
   );
 }
@@ -65,10 +65,10 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="px-6 py-4 border-b border-slate-100 last:border-0">
-      <div className="flex items-center gap-2 mb-3">
-        <Icon size={14} className="text-muted-foreground" />
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="border-b px-6 py-4 last:border-0">
+      <div className="mb-3 flex items-center gap-2">
+        <Icon className="size-3.5 text-muted-foreground" />
+        <span className="font-display text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {title}
         </span>
       </div>
@@ -145,7 +145,7 @@ export function BookingDetailsSheet({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
             onClick={onClose}
           />
 
@@ -156,12 +156,12 @@ export function BookingDetailsSheet({
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", stiffness: 320, damping: 32 }}
-            className="fixed right-0 top-0 h-full w-full sm:max-w-md z-50 flex flex-col bg-white shadow-2xl"
+            className="fixed right-0 top-0 z-50 flex h-full w-full flex-col bg-card shadow-2xl sm:max-w-md"
           >
             {/* Status header */}
             <div
               className={cn(
-                "relative bg-gradient-to-br px-6 pt-6 pb-8 shrink-0",
+                "relative shrink-0 bg-gradient-to-br px-6 pb-8 pt-6",
                 status
                   ? STATUS_GRADIENT[status]
                   : "from-slate-400 to-slate-300",
@@ -169,24 +169,24 @@ export function BookingDetailsSheet({
             >
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-1.5 rounded-full bg-black/10 hover:bg-black/20 transition-colors"
+                className="absolute right-4 top-4 rounded-full bg-black/10 p-1.5 transition-colors hover:bg-black/20"
               >
-                <X size={16} className="text-white" />
+                <X className="size-4 text-white" />
               </button>
 
               <p
                 className={cn(
-                  "text-xs font-bold uppercase tracking-widest mb-1 opacity-70",
+                  "mb-1 font-display text-xs font-bold uppercase tracking-widest opacity-70",
                   status ? STATUS_TEXT[status] : "text-slate-900",
                 )}
               >
                 {c.details.title}
               </p>
 
-              <div className="flex items-center gap-2 mb-3">
+              <div className="mb-3 flex items-center gap-2">
                 <span
                   className={cn(
-                    "inline-block px-3 py-1 rounded-full text-sm font-bold bg-white/30 backdrop-blur-sm",
+                    "inline-block rounded-full bg-white/30 px-3 py-1 text-sm font-bold backdrop-blur-sm",
                     status ? STATUS_TEXT[status] : "text-slate-900",
                   )}
                 >
@@ -195,12 +195,12 @@ export function BookingDetailsSheet({
                 {payment && (
                   <span
                     className={cn(
-                      "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border bg-white/50",
+                      "inline-flex items-center gap-1 rounded-full border bg-white/50 px-2.5 py-1 text-xs font-semibold",
                       PAYMENT_COLOR[payment.status],
                       payment.status === "pending" && "animate-pulse",
                     )}
                   >
-                    <CreditCard size={10} />
+                    <CreditCard className="size-2.5" />
                     {c.paymentStatus[payment.status]}
                   </span>
                 )}
@@ -255,7 +255,7 @@ export function BookingDetailsSheet({
                   /h
                 </Row>
                 <Row label={c.total as unknown as string}>
-                  <span className="font-bold text-base">
+                  <span className="text-base font-bold">
                     {Number(booking.total_price).toFixed(2)} {booking.currency}
                   </span>
                 </Row>
@@ -267,7 +267,7 @@ export function BookingDetailsSheet({
                   icon={FileText}
                   title={c.details.notes as unknown as string}
                 >
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
                     {booking.notes}
                   </p>
                 </Section>
@@ -286,16 +286,16 @@ export function BookingDetailsSheet({
                 <Row label={c.venue as unknown as string}>
                   <a
                     href={venueHref}
-                    className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                    className="inline-flex items-center gap-1 text-primary hover:underline"
                   >
                     <span className="font-mono text-xs">
                       {booking.venue_id.slice(0, 8)}…
                     </span>
-                    <ExternalLink size={11} />
+                    <ExternalLink className="size-3" />
                   </a>
                 </Row>
                 <Row label={c.details.updatedAt as unknown as string}>
-                  <span className="text-muted-foreground text-xs">
+                  <span className="text-xs text-muted-foreground">
                     {fmt(booking.updated_at)}
                   </span>
                 </Row>
@@ -304,7 +304,7 @@ export function BookingDetailsSheet({
 
             {/* Footer actions */}
             {(needsPayment || isPending) && (
-              <div className="shrink-0 border-t border-slate-100 bg-white px-6 py-4 flex gap-2">
+              <div className="flex shrink-0 gap-2 border-t bg-card px-6 py-4">
                 {needsPayment && (
                   <Button
                     className="flex-1 rounded-xl"
@@ -317,7 +317,7 @@ export function BookingDetailsSheet({
                 {isPending && (
                   <Button
                     variant="outline"
-                    className="flex-1 rounded-xl text-destructive hover:text-destructive border-destructive/30 hover:bg-destructive/10"
+                    className="flex-1 rounded-xl border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                     disabled={isCancelPending}
                     onClick={() => onCancel(booking.id)}
                   >
@@ -328,7 +328,7 @@ export function BookingDetailsSheet({
             )}
 
             {!needsPayment && !isPending && (
-              <div className="shrink-0 border-t border-slate-100 bg-white px-6 py-4">
+              <div className="shrink-0 border-t bg-card px-6 py-4">
                 <Button
                   variant="outline"
                   className="w-full rounded-xl"

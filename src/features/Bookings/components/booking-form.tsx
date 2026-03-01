@@ -3,7 +3,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useIntlayer, useLocaleStorage } from "react-intlayer";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import {
@@ -47,13 +46,17 @@ type CellState =
   | "past";
 
 const CELL_CLASSES: Record<CellState, string> = {
-  available: "bg-white hover:bg-emerald-50 cursor-pointer border-slate-100",
-  outside: "bg-slate-100 cursor-default border-slate-100",
-  unavailable: "bg-amber-50 cursor-default border-amber-100",
-  booked: "bg-red-100 cursor-default border-red-200",
-  mine: "bg-blue-100 cursor-default border-blue-200",
-  selected: "bg-emerald-100 border-emerald-300 cursor-pointer",
-  past: "bg-slate-50 cursor-default border-slate-100 opacity-50",
+  available:
+    "bg-card hover:bg-emerald-50 dark:hover:bg-emerald-950/30 cursor-pointer border-border",
+  outside: "bg-muted cursor-default border-border",
+  unavailable:
+    "bg-amber-50 dark:bg-amber-950/20 cursor-default border-amber-200 dark:border-amber-900/30",
+  booked:
+    "bg-red-100 dark:bg-red-950/20 cursor-default border-red-200 dark:border-red-900/30",
+  mine: "bg-blue-100 dark:bg-blue-950/20 cursor-default border-blue-200 dark:border-blue-900/30",
+  selected:
+    "bg-emerald-100 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700 cursor-pointer",
+  past: "bg-muted/50 cursor-default border-border opacity-50",
 };
 
 const LEGEND: { key: CellState; labelKey: string }[] = [
@@ -74,14 +77,13 @@ export function BookingForm({ venue }: BookingFormProps) {
   const { data: myBookings = [] } = useMyBookings();
   const { data: occupiedSlots = [] } = useOccupiedSlots(venue.id);
 
-  const [weekOffset, setWeekOffset] = useState(0); // in days
+  const [weekOffset, setWeekOffset] = useState(0);
   const [selDate, setSelDate] = useState<string | null>(null);
-  const [selStart, setSelStart] = useState<number | null>(null); // hour (inclusive)
-  const [selEnd, setSelEnd] = useState<number | null>(null); // hour (inclusive)
+  const [selStart, setSelStart] = useState<number | null>(null);
+  const [selEnd, setSelEnd] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // 7-day window
   const dates = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
@@ -90,7 +92,6 @@ export function BookingForm({ venue }: BookingFormProps) {
     });
   }, [weekOffset]);
 
-  // Hour range from working_hours
   const [minHour, maxHour] = useMemo(() => {
     let min = 8,
       max = 22;
@@ -109,7 +110,6 @@ export function BookingForm({ venue }: BookingFormProps) {
     [minHour, maxHour],
   );
 
-  // My bookings for this venue
   const myVenueBookings = useMemo(
     () =>
       myBookings.filter(
@@ -126,21 +126,18 @@ export function BookingForm({ venue }: BookingFormProps) {
     hour: number,
     dateObj: Date,
   ): CellState {
-    // Past slots
     const now = new Date();
     const nowDate = isoDate(now);
     if (dateStr < nowDate || (dateStr === nowDate && hour < now.getHours())) {
       return "past";
     }
 
-    // Working hours
     const key = jsDateToVenueKey(dateObj);
     const wh = venue.working_hours[key] ?? venue.working_hours["default"];
     if (!wh || hour < parseInt(wh.open) || hour >= parseInt(wh.close)) {
       return "outside";
     }
 
-    // Venue unavailabilities
     const cellStart = new Date(
       `${dateStr}T${String(hour).padStart(2, "0")}:00:00`,
     );
@@ -153,21 +150,18 @@ export function BookingForm({ venue }: BookingFormProps) {
       if (cellStart < ue && cellEnd > us) return "unavailable";
     }
 
-    // Others' bookings (anonymous — just the time window)
     for (const b of occupiedSlots) {
       const bs = new Date(b.start_datetime);
       const be = new Date(b.end_datetime);
       if (cellStart < be && cellEnd > bs) return "booked";
     }
 
-    // My bookings (shown differently so user recognises their own)
     for (const b of myVenueBookings) {
       const bs = new Date(b.start_datetime);
       const be = new Date(b.end_datetime);
       if (cellStart < be && cellEnd > bs) return "mine";
     }
 
-    // Selected range
     if (selDate === dateStr && selStart !== null) {
       const lo = selEnd !== null ? Math.min(selStart, selEnd) : selStart;
       const hi = selEnd !== null ? Math.max(selStart, selEnd) : selStart;
@@ -188,12 +182,10 @@ export function BookingForm({ venue }: BookingFormProps) {
       return;
 
     if (selDate !== dateStr || selStart === null) {
-      // New selection
       setSelDate(dateStr);
       setSelStart(hour);
       setSelEnd(null);
     } else if (selEnd === null) {
-      // Set end (allow clicking start again to clear)
       if (hour === selStart) {
         setSelStart(null);
         setSelDate(null);
@@ -204,7 +196,6 @@ export function BookingForm({ venue }: BookingFormProps) {
         setSelEnd(hi);
       }
     } else {
-      // Reset and start new
       setSelDate(dateStr);
       setSelStart(hour);
       setSelEnd(null);
@@ -279,8 +270,8 @@ export function BookingForm({ venue }: BookingFormProps) {
   const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="container mx-auto max-w-6xl px-6 py-8">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={() =>
@@ -289,23 +280,23 @@ export function BookingForm({ venue }: BookingFormProps) {
               params: { venueId: venue.id } as any,
             })
           }
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          className="mb-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft className="size-4" />
           {c.back}
         </button>
 
-        <h1 className="text-2xl font-bold text-slate-900 mb-6">
+        <h1 className="mb-6 font-display text-2xl font-bold tracking-tight text-foreground">
           {c.title} <span className="text-primary">{venue.name}</span>
         </h1>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid gap-8 lg:grid-cols-3">
             {/* Left: grid */}
-            <div className="lg:col-span-2 space-y-4">
-              <div className="bg-white rounded-2xl border shadow-sm p-4">
+            <div className="space-y-4 lg:col-span-2">
+              <div className="rounded-2xl border bg-card p-4 shadow-sm">
                 {/* Week nav */}
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3 flex items-center justify-between">
                   <Button
                     type="button"
                     variant="outline"
@@ -341,8 +332,10 @@ export function BookingForm({ venue }: BookingFormProps) {
                             <th
                               key={ds}
                               className={cn(
-                                "text-center pb-2 font-medium px-1",
-                                isToday ? "text-primary" : "text-slate-500",
+                                "px-1 pb-2 text-center font-medium",
+                                isToday
+                                  ? "text-primary"
+                                  : "text-muted-foreground",
                               )}
                             >
                               <div>{DAY_SHORT[(d.getDay() + 6) % 7]}</div>
@@ -362,7 +355,7 @@ export function BookingForm({ venue }: BookingFormProps) {
                     <tbody>
                       {hours.map((hour) => (
                         <tr key={hour}>
-                          <td className="text-right pr-2 text-slate-400 tabular-nums py-0 leading-none w-12">
+                          <td className="w-12 py-0 pr-2 text-right tabular-nums leading-none text-muted-foreground">
                             {String(hour).padStart(2, "0")}:00
                           </td>
                           {dates.map((d) => {
@@ -391,7 +384,7 @@ export function BookingForm({ venue }: BookingFormProps) {
                 </div>
 
                 {/* Legend */}
-                <div className="flex flex-wrap gap-3 mt-4 pt-3 border-t border-slate-100">
+                <div className="mt-4 flex flex-wrap gap-3 border-t pt-3">
                   {LEGEND.map(({ key, labelKey }) => (
                     <div
                       key={key}
@@ -399,7 +392,7 @@ export function BookingForm({ venue }: BookingFormProps) {
                     >
                       <div
                         className={cn(
-                          "w-3 h-3 rounded-sm border",
+                          "size-3 rounded-sm border",
                           CELL_CLASSES[key],
                         )}
                       />
@@ -410,8 +403,8 @@ export function BookingForm({ venue }: BookingFormProps) {
               </div>
 
               {/* Notes */}
-              <div className="bg-white rounded-2xl border shadow-sm p-6 space-y-3">
-                <h2 className="font-semibold text-slate-900 text-sm">
+              <div className="space-y-3 rounded-2xl border bg-card p-6 shadow-sm">
+                <h2 className="font-display text-sm font-semibold text-foreground">
                   {c.sections.notes}
                 </h2>
                 <Textarea
@@ -424,7 +417,7 @@ export function BookingForm({ venue }: BookingFormProps) {
               </div>
 
               {error && (
-                <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-2">
+                <p className="rounded-lg bg-destructive/10 px-4 py-2 text-sm text-destructive">
                   {error}
                 </p>
               )}
@@ -432,13 +425,13 @@ export function BookingForm({ venue }: BookingFormProps) {
 
             {/* Right: summary */}
             <div className="lg:col-span-1">
-              <div className="sticky top-24 bg-white rounded-2xl border shadow-sm p-6 space-y-5">
+              <div className="sticky top-20 space-y-5 rounded-2xl border bg-card p-6 shadow-sm">
                 <div>
-                  <p className="font-semibold text-slate-900 truncate">
+                  <p className="truncate font-display font-semibold text-foreground">
                     {venue.name}
                   </p>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-2xl font-bold">
+                  <div className="mt-1 flex items-baseline gap-1">
+                    <span className="font-display text-2xl font-bold text-foreground">
                       {Number(venue.price_per_hour).toFixed(0)}
                     </span>
                     <span className="text-sm text-muted-foreground">
@@ -447,12 +440,12 @@ export function BookingForm({ venue }: BookingFormProps) {
                   </div>
                 </div>
 
-                <Separator />
+                <hr className="border-border" />
 
                 <div className="space-y-2 text-sm">
                   {formattedSel ? (
                     <>
-                      <p className="font-medium text-slate-800">
+                      <p className="font-medium text-foreground">
                         {formattedSel}
                       </p>
                       <div className="flex justify-between text-muted-foreground">
@@ -460,7 +453,7 @@ export function BookingForm({ venue }: BookingFormProps) {
                           {duration} {c.labels.hours}
                         </span>
                       </div>
-                      <div className="flex justify-between font-semibold text-base pt-1 border-t border-slate-100">
+                      <div className="flex justify-between border-t pt-1 text-base font-semibold text-foreground">
                         <span>{c.summary.total}</span>
                         <span>
                           {totalPrice} {venue.currency}
@@ -468,7 +461,7 @@ export function BookingForm({ venue }: BookingFormProps) {
                       </div>
                     </>
                   ) : (
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {c.summary.noTime}
                     </p>
                   )}
@@ -477,7 +470,7 @@ export function BookingForm({ venue }: BookingFormProps) {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full rounded-xl"
+                  className="w-full gap-2 rounded-xl shadow-lg shadow-primary/20"
                   disabled={
                     createBooking.isPending ||
                     createCheckout.isPending ||
