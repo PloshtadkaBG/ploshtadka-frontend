@@ -16,6 +16,10 @@ const userNavContent = {
         en: "Settings",
         bg: "Настройки",
       }),
+      management: t({
+        en: "Management",
+        bg: "Управление",
+      }),
       logout: t({
         en: "Logout",
         bg: "Излез",

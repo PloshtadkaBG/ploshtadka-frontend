@@ -13,6 +13,7 @@ import { LocalizedLink } from "./localized-link";
 import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
 import { useIntlayer } from "react-intlayer";
 import { useEffect, useState } from "react";
+import { Settings } from "lucide-react";
 
 export function UserNav({ onAction }: { onAction?: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -80,6 +81,17 @@ export function UserNav({ onAction }: { onAction?: () => void }) {
             {content.labels.settings}
           </LocalizedLink>
         </DropdownMenuItem>
+        {user.scopes?.some(
+          (s: string) => s.startsWith("admin:") || s === "venues:me",
+        ) && (
+          <DropdownMenuItem asChild>
+            <a href="/admin" onClick={onAction} className="gap-1.5">
+              <Settings className="size-3.5" />
+              {content.labels.management}
+            </a>
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive">
           {content.labels.logout}
         </DropdownMenuItem>
