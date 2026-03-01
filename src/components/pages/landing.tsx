@@ -76,7 +76,7 @@ export function Landing() {
               {content.hero.ctaPrimary}
             </Button>
             <Button size="lg" variant="outline" className="gap-2 px-8" asChild>
-              <Link to="/about-us">
+              <Link to="/about-us" hash="list-your-venue">
                 {content.hero.ctaSecondary}
                 <ArrowRight className="size-4" />
               </Link>

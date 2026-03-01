@@ -100,7 +100,7 @@ const Footer: FC = () => {
             <ul className="mt-4 space-y-2.5">
               <li>
                 <LocalizedLink
-                  to="/venues"
+                  to="/about-us"
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {content.sections.forOwners.listVenue}
@@ -108,18 +108,10 @@ const Footer: FC = () => {
               </li>
               <li>
                 <LocalizedLink
-                  to="/pricing"
+                  to="/contacts"
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  {content.sections.forOwners.pricing}
-                </LocalizedLink>
-              </li>
-              <li>
-                <LocalizedLink
-                  to="/about-us"
-                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  {content.sections.forOwners.support}
+                  {content.sections.forOwners.contact}
                 </LocalizedLink>
               </li>
             </ul>
@@ -133,7 +125,7 @@ const Footer: FC = () => {
             <ul className="mt-4 space-y-2.5">
               <li>
                 <LocalizedLink
-                  to="/about-us"
+                  to="/contacts"
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
                   {content.sections.connect.contact}

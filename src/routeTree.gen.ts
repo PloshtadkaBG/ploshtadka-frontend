@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char123LocaleChar125RouteRouteImport } from './routes/{-$locale}/route'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
+import { Route as Char123LocaleChar125ContactsRouteImport } from './routes/{-$locale}/contacts'
+import { Route as Char123LocaleChar125AboutUsRouteImport } from './routes/{-$locale}/about-us'
 import { Route as Char123LocaleChar125404RouteImport } from './routes/{-$locale}/404'
 import { Route as Char123LocaleChar125SplatRouteImport } from './routes/{-$locale}/$'
 import { Route as Char123LocaleChar125VenuesIndexRouteImport } from './routes/{-$locale}/venues/index'
@@ -30,6 +32,18 @@ const Char123LocaleChar125IndexRoute =
   Char123LocaleChar125IndexRouteImport.update({
     id: '/',
     path: '/',
+    getParentRoute: () => Char123LocaleChar125RouteRoute,
+  } as any)
+const Char123LocaleChar125ContactsRoute =
+  Char123LocaleChar125ContactsRouteImport.update({
+    id: '/contacts',
+    path: '/contacts',
+    getParentRoute: () => Char123LocaleChar125RouteRoute,
+  } as any)
+const Char123LocaleChar125AboutUsRoute =
+  Char123LocaleChar125AboutUsRouteImport.update({
+    id: '/about-us',
+    path: '/about-us',
     getParentRoute: () => Char123LocaleChar125RouteRoute,
   } as any)
 const Char123LocaleChar125404Route = Char123LocaleChar125404RouteImport.update({
@@ -84,6 +98,8 @@ export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
   '/{-$locale}/404': typeof Char123LocaleChar125404Route
+  '/{-$locale}/about-us': typeof Char123LocaleChar125AboutUsRoute
+  '/{-$locale}/contacts': typeof Char123LocaleChar125ContactsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/auth/login': typeof Char123LocaleChar125AuthLoginRoute
   '/{-$locale}/auth/signup': typeof Char123LocaleChar125AuthSignupRoute
@@ -95,6 +111,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
   '/{-$locale}/404': typeof Char123LocaleChar125404Route
+  '/{-$locale}/about-us': typeof Char123LocaleChar125AboutUsRoute
+  '/{-$locale}/contacts': typeof Char123LocaleChar125ContactsRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/auth/login': typeof Char123LocaleChar125AuthLoginRoute
   '/{-$locale}/auth/signup': typeof Char123LocaleChar125AuthSignupRoute
@@ -108,6 +126,8 @@ export interface FileRoutesById {
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
   '/{-$locale}/404': typeof Char123LocaleChar125404Route
+  '/{-$locale}/about-us': typeof Char123LocaleChar125AboutUsRoute
+  '/{-$locale}/contacts': typeof Char123LocaleChar125ContactsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/{-$locale}/auth/login': typeof Char123LocaleChar125AuthLoginRoute
   '/{-$locale}/auth/signup': typeof Char123LocaleChar125AuthSignupRoute
@@ -122,6 +142,8 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/{-$locale}/$'
     | '/{-$locale}/404'
+    | '/{-$locale}/about-us'
+    | '/{-$locale}/contacts'
     | '/{-$locale}/'
     | '/{-$locale}/auth/login'
     | '/{-$locale}/auth/signup'
@@ -133,6 +155,8 @@ export interface FileRouteTypes {
   to:
     | '/{-$locale}/$'
     | '/{-$locale}/404'
+    | '/{-$locale}/about-us'
+    | '/{-$locale}/contacts'
     | '/{-$locale}'
     | '/{-$locale}/auth/login'
     | '/{-$locale}/auth/signup'
@@ -145,6 +169,8 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/{-$locale}/$'
     | '/{-$locale}/404'
+    | '/{-$locale}/about-us'
+    | '/{-$locale}/contacts'
     | '/{-$locale}/'
     | '/{-$locale}/auth/login'
     | '/{-$locale}/auth/signup'
@@ -172,6 +198,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/{-$locale}/'
       preLoaderRoute: typeof Char123LocaleChar125IndexRouteImport
+      parentRoute: typeof Char123LocaleChar125RouteRoute
+    }
+    '/{-$locale}/contacts': {
+      id: '/{-$locale}/contacts'
+      path: '/contacts'
+      fullPath: '/{-$locale}/contacts'
+      preLoaderRoute: typeof Char123LocaleChar125ContactsRouteImport
+      parentRoute: typeof Char123LocaleChar125RouteRoute
+    }
+    '/{-$locale}/about-us': {
+      id: '/{-$locale}/about-us'
+      path: '/about-us'
+      fullPath: '/{-$locale}/about-us'
+      preLoaderRoute: typeof Char123LocaleChar125AboutUsRouteImport
       parentRoute: typeof Char123LocaleChar125RouteRoute
     }
     '/{-$locale}/404': {
@@ -236,6 +276,8 @@ declare module '@tanstack/react-router' {
 interface Char123LocaleChar125RouteRouteChildren {
   Char123LocaleChar125SplatRoute: typeof Char123LocaleChar125SplatRoute
   Char123LocaleChar125404Route: typeof Char123LocaleChar125404Route
+  Char123LocaleChar125AboutUsRoute: typeof Char123LocaleChar125AboutUsRoute
+  Char123LocaleChar125ContactsRoute: typeof Char123LocaleChar125ContactsRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
   Char123LocaleChar125AuthLoginRoute: typeof Char123LocaleChar125AuthLoginRoute
   Char123LocaleChar125AuthSignupRoute: typeof Char123LocaleChar125AuthSignupRoute
@@ -249,6 +291,8 @@ const Char123LocaleChar125RouteRouteChildren: Char123LocaleChar125RouteRouteChil
   {
     Char123LocaleChar125SplatRoute: Char123LocaleChar125SplatRoute,
     Char123LocaleChar125404Route: Char123LocaleChar125404Route,
+    Char123LocaleChar125AboutUsRoute: Char123LocaleChar125AboutUsRoute,
+    Char123LocaleChar125ContactsRoute: Char123LocaleChar125ContactsRoute,
     Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
     Char123LocaleChar125AuthLoginRoute: Char123LocaleChar125AuthLoginRoute,
     Char123LocaleChar125AuthSignupRoute: Char123LocaleChar125AuthSignupRoute,

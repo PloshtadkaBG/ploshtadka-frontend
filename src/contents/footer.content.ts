@@ -29,8 +29,7 @@ const footerContent = {
       forOwners: {
         title: t({ en: "For Venue Owners", bg: "За собственици" }),
         listVenue: t({ en: "List Your Venue", bg: "Добави обект" }),
-        pricing: t({ en: "Pricing", bg: "Цени" }),
-        support: t({ en: "Support", bg: "Поддръжка" }),
+        contact: t({ en: "Contact Us", bg: "Свържи се с нас" }),
       },
       connect: {
         title: t({ en: "Connect", bg: "Свържи се" }),

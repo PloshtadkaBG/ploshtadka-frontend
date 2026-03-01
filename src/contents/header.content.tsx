@@ -17,8 +17,8 @@ const headerContent = {
         label: t({ en: "About", bg: "За нас" }),
       },
       {
-        href: "/pricing",
-        label: t({ en: "Pricing", bg: "Цени" }),
+        href: "/contacts",
+        label: t({ en: "Contacts", bg: "Контакти" }),
       },
     ],
     cta: t({
