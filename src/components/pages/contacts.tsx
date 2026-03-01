@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useIntlayer } from "react-intlayer";
 import { Mail, Github, MapPin, CheckCircle, AlertCircle } from "lucide-react";
+import Turnstile, { type BoundTurnstileObject } from "react-turnstile";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import apiClient from "../../lib/api-client";
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? "";
 
 const CHANNEL_ICONS = [
   <Mail className="size-5" />,
@@ -14,7 +17,11 @@ const CHANNEL_ICONS = [
 
 export function Contacts() {
   const content = useIntlayer("contacts");
-  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "success" | "error"
+  >("idle");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const boundTurnstile = useRef<BoundTurnstileObject | null>(null);
 
   const channels = [
     {
@@ -36,6 +43,8 @@ export function Contacts() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!turnstileToken) return;
+
     setStatus("sending");
 
     const formData = new FormData(e.currentTarget);
@@ -47,11 +56,16 @@ export function Contacts() {
         email: formData.get("email"),
         subject: formData.get("subject"),
         message: formData.get("message"),
+        turnstile_token: turnstileToken,
       });
       setStatus("success");
       form.reset();
+      setTurnstileToken(null);
+      boundTurnstile.current?.reset();
     } catch {
       setStatus("error");
+      boundTurnstile.current?.reset();
+      setTurnstileToken(null);
     }
   }
 
@@ -91,7 +105,9 @@ export function Contacts() {
                   {"href" in channel && channel.href && (
                     <a
                       href={channel.href}
-                      target={channel.href.startsWith("mailto") ? undefined : "_blank"}
+                      target={
+                        channel.href.startsWith("mailto") ? undefined : "_blank"
+                      }
                       rel="noopener noreferrer"
                       className="mt-1 inline-block text-sm font-medium text-primary hover:underline"
                     >
@@ -123,10 +139,7 @@ export function Contacts() {
               </div>
             )}
 
-            <form
-              className="mt-6 space-y-5"
-              onSubmit={handleSubmit}
-            >
+            <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label
@@ -154,9 +167,7 @@ export function Contacts() {
                     id="contact-email"
                     name="email"
                     type="email"
-                    placeholder={
-                      content.form.email.placeholder.value as string
-                    }
+                    placeholder={content.form.email.placeholder.value as string}
                     required
                     disabled={status === "sending"}
                   />
@@ -173,9 +184,7 @@ export function Contacts() {
                 <Input
                   id="contact-subject"
                   name="subject"
-                  placeholder={
-                    content.form.subject.placeholder.value as string
-                  }
+                  placeholder={content.form.subject.placeholder.value as string}
                   required
                   disabled={status === "sending"}
                 />
@@ -192,20 +201,35 @@ export function Contacts() {
                   id="contact-message"
                   name="message"
                   rows={5}
-                  placeholder={
-                    content.form.message.placeholder.value as string
-                  }
+                  placeholder={content.form.message.placeholder.value as string}
                   required
                   disabled={status === "sending"}
                 />
               </div>
 
+              {TURNSTILE_SITE_KEY && (
+                <Turnstile
+                  sitekey={TURNSTILE_SITE_KEY}
+                  onVerify={(token, bt) => {
+                    setTurnstileToken(token);
+                    boundTurnstile.current = bt;
+                  }}
+                  onExpire={() => setTurnstileToken(null)}
+                  theme="auto"
+                />
+              )}
+
               <Button
                 type="submit"
                 className="w-full shadow-sm"
-                disabled={status === "sending"}
+                disabled={
+                  status === "sending" ||
+                  (!!TURNSTILE_SITE_KEY && !turnstileToken)
+                }
               >
-                {status === "sending" ? content.form.sending : content.form.submit}
+                {status === "sending"
+                  ? content.form.sending
+                  : content.form.submit}
               </Button>
             </form>
           </div>
