@@ -26,12 +26,12 @@ export function Contacts() {
   const channels = [
     {
       ...content.channels.email,
-      href: `mailto:${content.channels.email.value}`,
+      href: `mailto:${content.channels.email.value.value as string}`,
       icon: CHANNEL_ICONS[0],
     },
     {
       ...content.channels.github,
-      href: `https://${content.channels.github.value}`,
+      href: `https://${content.channels.github.value.value as string}`,
       icon: CHANNEL_ICONS[1],
     },
     {
