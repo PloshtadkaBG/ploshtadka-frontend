@@ -1,6 +1,6 @@
 import NotFound from "@/components/pages/not-found";
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { defaultLocale, validatePrefix } from "intlayer";
+import { defaultLocale, getIntlayer, validatePrefix } from "intlayer";
 
 export const Route = createFileRoute("/{-$locale}")({
   // beforeLoad runs before the route renders (on both server and client)
@@ -26,6 +26,31 @@ export const Route = createFileRoute("/{-$locale}")({
         params: { locale: localePrefix },
       });
     }
+  },
+  head: ({ params }) => {
+    const { locale } = params;
+    const meta = getIntlayer("root", locale).meta;
+
+    const currentUrl = `https://площадка.бг/${locale}`;
+
+    return {
+      meta: [
+        { title: meta.title },
+        { name: "description", content: meta.description },
+        { property: "og:title", content: meta.title },
+        { property: "og:description", content: meta.description },
+        {
+          property: "og:image",
+          content: `https://media4.giphy.com/media/v1.Y2lkPTZjMDliOTUyZHhhNXFsYnRncXpyNTB6Mnl6amFkOWRucWV3YTVsZmJsMWF2c2tyNSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/dGLwOt8LiqNaNvUODg/200w.gif`,
+        },
+        { property: "og:url", content: currentUrl },
+        { property: "og:type", content: "website" },
+
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: meta.title },
+        { name: "twitter:description", content: meta.description },
+      ],
+    };
   },
   component: Outlet,
   // notFoundComponent is called when a child route doesn't exist
