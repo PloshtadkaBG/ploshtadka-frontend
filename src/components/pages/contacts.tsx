@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useIntlayer } from "react-intlayer";
+import { Mail, Github, MapPin, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { Mail, Github, MapPin } from "lucide-react";
+import apiClient from "../../lib/api-client";
 
 const CHANNEL_ICONS = [
   <Mail className="size-5" />,
@@ -12,6 +14,7 @@ const CHANNEL_ICONS = [
 
 export function Contacts() {
   const content = useIntlayer("contacts");
+  const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
 
   const channels = [
     {
@@ -30,6 +33,27 @@ export function Contacts() {
       icon: CHANNEL_ICONS[2],
     },
   ];
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStatus("sending");
+
+    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+
+    try {
+      await apiClient.post("/auth/contact", {
+        name: formData.get("name"),
+        email: formData.get("email"),
+        subject: formData.get("subject"),
+        message: formData.get("message"),
+      });
+      setStatus("success");
+      form.reset();
+    } catch {
+      setStatus("error");
+    }
+  }
 
   return (
     <div className="flex flex-col">
@@ -85,14 +109,23 @@ export function Contacts() {
               {content.form.title}
             </h2>
 
+            {status === "success" && (
+              <div className="mt-4 flex items-center gap-2 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+                <CheckCircle className="size-4 shrink-0" />
+                {content.form.success}
+              </div>
+            )}
+
+            {status === "error" && (
+              <div className="mt-4 flex items-center gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                <AlertCircle className="size-4 shrink-0" />
+                {content.form.error}
+              </div>
+            )}
+
             <form
               className="mt-6 space-y-5"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                const mailto = `mailto:contact@ploshtadka.bg?subject=${encodeURIComponent(String(formData.get("subject") ?? ""))}&body=${encodeURIComponent(`From: ${formData.get("name")} (${formData.get("email")})\n\n${formData.get("message")}`)}`;
-                window.location.href = mailto;
-              }}
+              onSubmit={handleSubmit}
             >
               <div className="grid gap-5 sm:grid-cols-2">
                 <div className="space-y-2">
@@ -107,6 +140,7 @@ export function Contacts() {
                     name="name"
                     placeholder={content.form.name.placeholder.value as string}
                     required
+                    disabled={status === "sending"}
                   />
                 </div>
                 <div className="space-y-2">
@@ -124,6 +158,7 @@ export function Contacts() {
                       content.form.email.placeholder.value as string
                     }
                     required
+                    disabled={status === "sending"}
                   />
                 </div>
               </div>
@@ -142,6 +177,7 @@ export function Contacts() {
                     content.form.subject.placeholder.value as string
                   }
                   required
+                  disabled={status === "sending"}
                 />
               </div>
 
@@ -160,11 +196,16 @@ export function Contacts() {
                     content.form.message.placeholder.value as string
                   }
                   required
+                  disabled={status === "sending"}
                 />
               </div>
 
-              <Button type="submit" className="w-full shadow-sm">
-                {content.form.submit}
+              <Button
+                type="submit"
+                className="w-full shadow-sm"
+                disabled={status === "sending"}
+              >
+                {status === "sending" ? content.form.sending : content.form.submit}
               </Button>
             </form>
           </div>

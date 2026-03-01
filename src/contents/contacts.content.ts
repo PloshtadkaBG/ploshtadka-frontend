@@ -65,6 +65,15 @@ const contactsContent = {
         }),
       },
       submit: t({ en: "Send Message", bg: "Изпрати съобщение" }),
+      sending: t({ en: "Sending...", bg: "Изпращане..." }),
+      success: t({
+        en: "Message sent! We'll get back to you soon.",
+        bg: "Съобщението е изпратено! Ще се свържем с вас скоро.",
+      }),
+      error: t({
+        en: "Failed to send message. Please try again later.",
+        bg: "Неуспешно изпращане. Моля, опитайте по-късно.",
+      }),
     },
   },
 } satisfies Dictionary;
