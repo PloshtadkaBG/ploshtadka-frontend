@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useIntlayer } from "react-intlayer";
 import { useLocalizedNavigate } from "@/hooks/useLocalizedNavigate";
@@ -31,6 +31,202 @@ const STATUS_VARIANT: Record<
 };
 
 const DAY_KEYS = ["0", "1", "2", "3", "4", "5", "6"] as const;
+
+/* ── Lightbox with pinch-to-zoom + pan ── */
+
+function getDistance(t1: React.Touch, t2: React.Touch) {
+  return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+}
+
+function LightboxOverlay({
+  images,
+  index,
+  venueName,
+  onClose,
+  onPrev,
+  onNext,
+}: {
+  images: { id: string; url: string }[];
+  index: number;
+  venueName: string;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const [scale, setScale] = useState(1);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
+
+  const pinchRef = useRef<{ startDist: number; startScale: number } | null>(
+    null,
+  );
+  const panRef = useRef<{
+    startX: number;
+    startY: number;
+    startTx: number;
+    startTy: number;
+  } | null>(null);
+
+  // Reset transform when image changes
+  useEffect(() => {
+    setScale(1);
+    setTranslate({ x: 0, y: 0 });
+  }, [index]);
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 2) {
+        // Pinch start
+        e.preventDefault();
+        const dist = getDistance(e.touches[0], e.touches[1]);
+        pinchRef.current = { startDist: dist, startScale: scale };
+        panRef.current = null;
+      } else if (e.touches.length === 1 && scale > 1) {
+        // Pan start (only when zoomed)
+        panRef.current = {
+          startX: e.touches[0].clientX,
+          startY: e.touches[0].clientY,
+          startTx: translate.x,
+          startTy: translate.y,
+        };
+      }
+    },
+    [scale, translate],
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length === 2 && pinchRef.current) {
+        e.preventDefault();
+        const dist = getDistance(e.touches[0], e.touches[1]);
+        const newScale = Math.min(
+          5,
+          Math.max(
+            1,
+            pinchRef.current.startScale * (dist / pinchRef.current.startDist),
+          ),
+        );
+        setScale(newScale);
+        if (newScale === 1) setTranslate({ x: 0, y: 0 });
+      } else if (e.touches.length === 1 && panRef.current && scale > 1) {
+        const dx = e.touches[0].clientX - panRef.current.startX;
+        const dy = e.touches[0].clientY - panRef.current.startY;
+        setTranslate({
+          x: panRef.current.startTx + dx,
+          y: panRef.current.startTy + dy,
+        });
+      }
+    },
+    [scale],
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    pinchRef.current = null;
+    panRef.current = null;
+    // Snap back if scale went below 1
+    if (scale <= 1.05) {
+      setScale(1);
+      setTranslate({ x: 0, y: 0 });
+    }
+  }, [scale]);
+
+  // Double-tap to toggle zoom
+  const lastTapRef = useRef(0);
+  const handleDoubleTap = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      const now = Date.now();
+      if (now - lastTapRef.current < 300) {
+        // Double tap
+        if (scale > 1) {
+          setScale(1);
+          setTranslate({ x: 0, y: 0 });
+        } else {
+          setScale(2.5);
+        }
+      }
+      lastTapRef.current = now;
+    },
+    [scale],
+  );
+
+  const isZoomed = scale > 1;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+      onClick={() => !isZoomed && onClose()}
+    >
+      {/* Close */}
+      <button
+        onClick={onClose}
+        className="absolute right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+        aria-label="Close"
+      >
+        <X className="size-5" />
+      </button>
+
+      {/* Counter */}
+      <span className="absolute left-4 top-4 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm">
+        {index + 1} / {images.length}
+      </span>
+
+      {/* Prev */}
+      {images.length > 1 && !isZoomed && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onPrev();
+          }}
+          className="absolute left-4 z-10 flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+          aria-label="Previous image"
+        >
+          <ChevronLeft className="size-5" />
+        </button>
+      )}
+
+      {/* Zoomable image container */}
+      <div
+        className="flex max-h-[85vh] max-w-[95vw] items-center justify-center overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => {
+          handleDoubleTap(e);
+          handleTouchStart(e);
+        }}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ touchAction: "none" }}
+      >
+        <img
+          src={images[index].url}
+          alt={venueName}
+          className="max-h-[85vh] max-w-[95vw] select-none object-contain"
+          draggable={false}
+          style={{
+            transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+            transition:
+              pinchRef.current || panRef.current
+                ? "none"
+                : "transform 0.2s ease-out",
+          }}
+        />
+      </div>
+
+      {/* Next */}
+      {images.length > 1 && !isZoomed && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onNext();
+          }}
+          className="absolute right-4 z-10 flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+          aria-label="Next image"
+        >
+          <ChevronRight className="size-5" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 interface VenueDetailProps {
   venue: VenueResponse;
@@ -99,61 +295,14 @@ export function VenueDetail({ venue }: VenueDetailProps) {
     <>
       {/* Lightbox overlay */}
       {lightboxOpen && images.length > 0 && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
-          onClick={closeLightbox}
-        >
-          {/* Close */}
-          <button
-            onClick={closeLightbox}
-            className="absolute right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-            aria-label="Close"
-          >
-            <X className="size-5" />
-          </button>
-
-          {/* Counter */}
-          <span className="absolute left-4 top-4 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white backdrop-blur-sm">
-            {lightboxIndex + 1} / {images.length}
-          </span>
-
-          {/* Prev */}
-          {images.length > 1 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                lightboxPrev();
-              }}
-              className="absolute left-4 z-10 flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="size-5" />
-            </button>
-          )}
-
-          {/* Image — pinch-to-zoom enabled */}
-          <img
-            src={images[lightboxIndex].url}
-            alt={venue.name}
-            onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] max-w-[95vw] touch-pinch-zoom object-contain select-none"
-            draggable={false}
-          />
-
-          {/* Next */}
-          {images.length > 1 && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                lightboxNext();
-              }}
-              className="absolute right-4 z-10 flex size-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-              aria-label="Next image"
-            >
-              <ChevronRight className="size-5" />
-            </button>
-          )}
-        </div>
+        <LightboxOverlay
+          images={images}
+          index={lightboxIndex}
+          venueName={venue.name}
+          onClose={closeLightbox}
+          onPrev={lightboxPrev}
+          onNext={lightboxNext}
+        />
       )}
       <div className="min-h-screen">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
