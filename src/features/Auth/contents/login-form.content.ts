@@ -67,6 +67,16 @@ const loginFormContent = {
       en: "Continue with Google",
       bg: "Продължи с Google",
     }),
+    panel: {
+      tagline: t({
+        en: "Book your next game.",
+        bg: "Резервирай следващата си игра.",
+      }),
+      subtitle: t({
+        en: "Find and reserve sports venues across Bulgaria in seconds.",
+        bg: "Намерете и резервирайте спортни обекти в цяла България за секунди.",
+      }),
+    },
   },
 } satisfies Dictionary;
 

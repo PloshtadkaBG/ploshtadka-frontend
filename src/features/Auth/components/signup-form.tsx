@@ -74,7 +74,9 @@ export function SignupForm({
     >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">{content.title}</h1>
+          <h1 className="font-display text-2xl font-bold tracking-tight">
+            {content.title}
+          </h1>
           <p className="text-muted-foreground text-sm text-balance">
             {content.description}
           </p>
@@ -180,7 +182,7 @@ export function SignupForm({
         />
 
         <Field>
-          <span className="text-center text-xs underline-offset-4 -mt-5 text-gray-700">
+          <span className="text-center text-xs underline-offset-4 -mt-5 text-muted-foreground">
             {content.legal.text}
             <Link
               to="/terms-and-conditions"

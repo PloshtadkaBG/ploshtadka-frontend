@@ -64,6 +64,16 @@ const signupContent = {
       text: t({ en: "Already have an account? ", bg: "Вече имате профил? " }),
       link: t({ en: "Sign in", bg: "Вход" }),
     },
+    panel: {
+      tagline: t({
+        en: "Join the community.",
+        bg: "Присъединете се към общността.",
+      }),
+      subtitle: t({
+        en: "Create an account to start booking sports venues across Bulgaria.",
+        bg: "Създайте профил, за да започнете да резервирате спортни обекти в цяла България.",
+      }),
+    },
   },
 } satisfies Dictionary;
 

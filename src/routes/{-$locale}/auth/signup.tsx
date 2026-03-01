@@ -19,5 +19,14 @@ export const Route = createFileRoute("/{-$locale}/auth/signup")({
 });
 
 function RouteComponent() {
-  return <FormWrapper form={<SignupForm />} />;
+  const { locale } = Route.useParams();
+  const content = getIntlayer("signup", locale);
+
+  return (
+    <FormWrapper
+      form={<SignupForm />}
+      tagline={content.panel.tagline as string}
+      subtitle={content.panel.subtitle as string}
+    />
+  );
 }
