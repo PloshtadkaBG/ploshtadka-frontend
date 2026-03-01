@@ -33,7 +33,7 @@ const contactsContent = {
           en: "Report bugs, request features, or contribute",
           bg: "Докладвайте бъгове, предложете функции или допринесете",
         }),
-        value: "github.com/HexChap",
+        value: "github.com/PloshtadkaBG",
       },
       location: {
         label: t({ en: "Location", bg: "Местоположение" }),
