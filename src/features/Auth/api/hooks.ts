@@ -88,6 +88,18 @@ export const useUser = (userId: number) => {
   });
 };
 
+export const useVerifyEmail = () => {
+  return useMutation({
+    mutationFn: async (token: string) => {
+      const { data } = await apiClient.get<{ message: string }>(
+        `/auth/verify-email`,
+        { params: { token } },
+      );
+      return data;
+    },
+  });
+};
+
 export const useRegisterUser = () => {
   const queryClient = useQueryClient();
   return useMutation({

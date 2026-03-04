@@ -55,7 +55,7 @@ export function SignupForm({
         },
         {
           onSuccess: () => {
-            navigate("/auth/login");
+            navigate("/auth/check-email");
           },
         },
       );
